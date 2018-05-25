@@ -3,7 +3,6 @@ const router = express.Router()
 const app = express()
 const database = require('./src/database.js')
 const bodyParser = require('body-parser')
-const avocatModel = require('./src/models/avocat.js')
 const routes = require('./routes/routes.js')
 
 
