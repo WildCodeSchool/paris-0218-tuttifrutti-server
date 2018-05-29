@@ -4,7 +4,7 @@ const app = express()
 const avocatModel = require('../src/models/avocat.js')
 
 router.post('/reg', function (req, next) {
-console.log()
+
     let newUser = new avocatModel({
         email: req.body.user.email,
         password: req.body.user.password,

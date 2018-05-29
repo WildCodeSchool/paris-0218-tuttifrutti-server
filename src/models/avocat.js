@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
+const bcrypt = require('bcrypt');
 
 let avocatSchema = new mongoose.Schema({
     // id: Number,
@@ -36,5 +37,17 @@ let avocatSchema = new mongoose.Schema({
       type: String,
       required: true,}
   })
+
+  //hashing a password before saving it to the database
+avocatSchema.pre('save', function (next) {
+  let avocat = this;
+  bcrypt.hash(avocat.password, 13, function (err, hash){
+    if (err) {
+      return next(err);
+    }
+    avocat.password = hash;
+    next();
+  })
+});
 
   module.exports = mongoose.model('Avocat', avocatSchema)
