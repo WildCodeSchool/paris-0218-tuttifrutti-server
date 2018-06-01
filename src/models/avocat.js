@@ -7,7 +7,7 @@ let avocatSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, 
         lowercase: true
     },
     password: {
@@ -24,7 +24,6 @@ let avocatSchema = new mongoose.Schema({
     },
     cabinet: {
         type: String,
-        required: true
     },
     phone: {
         type: Number,
