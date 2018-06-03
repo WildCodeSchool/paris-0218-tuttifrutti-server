@@ -33,30 +33,30 @@ router.post('/reg', function (req, next) {
 // POST Login
 
 router.post('/login', (req, res, next) => {
-    // console.log('')
-    avocatModel.findOne({
-        email: req.body.creds.email
-    }, function (err, user) {
-        if (err) return next(err)
-        
-        bcrypt.compare(req.body.creds.password, user.password, function (err, result) {
-            if (err) {
-                console.log(err)
-                return next(Error('Wrong Password'))
-            }
 
-            req.session.userId = user._id
-            console.log({logged: req.session.userId, session: req.session })
-            res.json('ok')
+    avocatModel
+        .findOne({
+            email: req.body.creds.email
+        }, function (err, user) {
+            if (err) 
+                return next(err)
+
+            bcrypt
+                .compare(req.body.creds.password, user.password, function (err, result) {
+                    if (err) {
+                        console.log(err)
+                        return next(Error('Wrong Password'))
+                    }
+
+                    req.session.userId = user._id
+                    console.log({logged: req.session.userId, session: req.session})
+                    res.json('ok')
+                })
         })
-    })
 })
 
-app.get('/profile', function(req, res){
-    res.send('hello world');
-  });
-
-// router.get('/profile', requiresLogin, function(req, res, next) {
-// console.log('test') })
+app.get('/profile', function (req, res) {
+    res.send('hello world')
+})
 
 module.exports = router

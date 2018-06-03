@@ -3,11 +3,11 @@ const validator = require('validator')
 const bcrypt = require('bcrypt');
 
 let avocatSchema = new mongoose.Schema({
-    // id: Number,
+
     email: {
         type: String,
         required: true,
-        unique: true, 
+        unique: true,
         lowercase: true
     },
     password: {
@@ -23,7 +23,7 @@ let avocatSchema = new mongoose.Schema({
         required: true
     },
     cabinet: {
-        type: String,
+        type: String
     },
     phone: {
         type: Number,

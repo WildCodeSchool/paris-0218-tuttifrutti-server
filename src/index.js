@@ -5,38 +5,37 @@ const database = require('./database.js')
 const bodyParser = require('body-parser')
 const routes = require('./routes/routes.js')
 const session = require('express-session')
-// const FileStore = require('session-file-store')(session)
-
-// MIDDLEWARES
+// const FileStore = require('session-file-store')(session) MIDDLEWARES
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000') //req.headers.origin)
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-  res.header('Access-Control-Allow-Credentials', 'true')
-  next()
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000') //req.headers.origin)
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    res.header('Access-Control-Allow-Credentials', 'true')
+    next()
 })
 
 const secret = 'work hard'
 //use sessions for tracking logins
 app.use(session({
-  secret,
-  resave: true,
-  saveUninitialized: true,
-  // store: new FileStore({ secret })
+    secret, resave: true, saveUninitialized: true,
+    // store: new FileStore({ secret })
 }))
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}))
 
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`, { connectedAs: req.session.userId, cookie: req.headers.cookie })
-  next()
+    console.log(`${req.method} ${req.url}`, {
+        connectedAs: req.session.userId,
+        cookie: req.headers.cookie
+    })
+    next()
 })
-
+	
 // ROUTES
 
 app.get('/', (req, res) => {
-  res.json('A SUCCESFUL FETCH')
+    res.json('A SUCCESFUL FETCH')
 })
 
 app.use('/', routes)
