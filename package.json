@@ -4,8 +4,10 @@
     "bcrypt": "^2.0.1",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
+    "express-session": "^1.15.6",
     "htmllint-cli": "0.0.7",
     "mongoose": "^5.1.2",
+    "session-file-store": "^1.2.0",
     "snazzy": "^7.1.1",
     "standard": "^11.0.1",
     "stylelint": "^9.2.1",
@@ -13,6 +15,7 @@
     "validator": "^10.2.0"
   },
   "scripts": {
+    "start": "nodemon src --ignore sessions",
     "test": "echo 'no tests'",
     "lint": "npm run lint:js && npm run lint:css && npm run lint:html",
     "lint:js": "standard | snazzy",
