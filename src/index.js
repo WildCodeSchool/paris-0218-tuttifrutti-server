@@ -4,7 +4,7 @@ const app = express()
 const database = require('./database.js')
 const bodyParser = require('body-parser')
 const routes = require('./routes/routes.js')
-const session = require('express-session')
+// const session = require('express-session')
 // const FileStore = require('session-file-store')(session) MIDDLEWARES
 
 app.use((req, res, next) => {
@@ -14,23 +14,16 @@ app.use((req, res, next) => {
     next()
 })
 
-const secret = 'work hard'
+// const secret = 'work hard'
 //use sessions for tracking logins
-app.use(session({
-    secret, resave: true, saveUninitialized: true,
-    // store: new FileStore({ secret })
-}))
+// app.use(session({
+//     secret, resave: true, saveUninitialized: true,
+//     // store: new FileStore({ secret })
+// }))
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}))
 
-app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`, {
-        connectedAs: req.session.userId,
-        cookie: req.headers.cookie
-    })
-    next()
-})
 	
 // ROUTES
 

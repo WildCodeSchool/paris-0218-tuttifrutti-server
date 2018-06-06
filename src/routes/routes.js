@@ -4,6 +4,9 @@ const app = express()
 const mongoose = require('mongoose')
 const avocatModel = require('../models/avocat.js')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+
+const jwtSecret = 'ENCRYPTMEORSOMETHING'
 
 // POST Registration
 router.post('/reg', function (req, next) {
@@ -43,20 +46,26 @@ router.post('/login', (req, res, next) => {
 
             bcrypt
                 .compare(req.body.creds.password, user.password, function (err, result) {
-                    if (err) {
-                        console.log(err)
-                        return next(Error('Wrong Password'))
-                    }
-
-                    req.session.userId = user._id
-                    console.log({logged: req.session.userId, session: req.session})
-                    res.json('ok')
+                    if (result === true) {
+                        console.log(result)
+                    const token = jwt.sign({
+                        id: user._id,
+                        username: user.email
+                    }, jwtSecret)
+                    res.json({token})
+                }
+                if (result === false) {
+                    console.log(err)
+                    console.log('wrong password')
+                    return next(Error('Wrong Password'))
+                }
                 })
         })
 })
 
-app.get('/profile', function (req, res) {
-    res.send('hello world')
+app.get('/profile', (req, res) => {
+    res.json('A wqdgywygdgywd FETCH')
 })
+
 
 module.exports = router
