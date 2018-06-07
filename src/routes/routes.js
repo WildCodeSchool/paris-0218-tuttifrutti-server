@@ -5,8 +5,9 @@ const mongoose = require('mongoose')
 const avocatModel = require('../models/avocat.js')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const authCheck = require('../middlewares/authCheck.js')
 
-const jwtSecret = 'ENCRYPTMEORSOMETHING'
+const jwtSecret = 'MAKEITUNUVERSAL'
 
 // POST Registration
 router.post('/reg', function (req, next) {
@@ -48,23 +49,33 @@ router.post('/login', (req, res, next) => {
                 .compare(req.body.creds.password, user.password, function (err, result) {
                     if (result === true) {
                         console.log(result)
-                    const token = jwt.sign({
-                        id: user._id,
-                        username: user.email
-                    }, jwtSecret)
-                    res.json({token})
-                }
-                if (result === false) {
-                    console.log(err)
-                    console.log('wrong password')
-                    return next(Error('Wrong Password'))
-                }
+                        const token = jwt.sign({
+                            id: user._id,
+                            username: user.email
+                        }, jwtSecret)
+                        console.log(token)
+                        res.json({token})
+                    }
+                    if (result === false) {
+                        console.log(err)
+                        console.log('wrong password')
+                        return next(Error('Wrong Password'))
+                    }
                 })
         })
 })
+// Route to Auth?
 
-app.get('/profile', (req, res) => {
-    res.json('A wqdgywygdgywd FETCH')
+router.get('/secure', (req, res, next) => {
+    const token = req.headers.authorization.split(" ")[1]
+    jwt.verify(token, jwtSecret, function (err, decoded) {
+        if (err) {
+            console.log('error')
+            res.redirect('http://localhost:3000/login')
+        } else {
+            next()
+        }
+    })
 })
 
 
