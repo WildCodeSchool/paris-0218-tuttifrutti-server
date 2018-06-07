@@ -8,15 +8,13 @@ const authCheck = require('./middlewares/authCheck.js')
 const cors = require('cors')
 const jwtSecret = 'MAKEITUNUVERSAL'
 
-// app.use((req, res, next) => {
-//     res.header("Access-Control-Allow-Origin", req.headers.origin)
-//     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
-//     res.header('Access-Control-Allow-Credentials', 'true')
-//     next()
-// })
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", req.headers.origin)
+    next()
+})
 
 app.use(cors())
-
+app.options('/secure/', cors())
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`, {
         cookie: req.headers.cookie,
