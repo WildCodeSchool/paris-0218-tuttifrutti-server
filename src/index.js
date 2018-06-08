@@ -4,17 +4,18 @@ const app = express()
 const database = require('./database.js')
 const bodyParser = require('body-parser')
 const routes = require('./routes/routes.js')
-const authCheck = require('./middlewares/authCheck.js')
-const cors = require('cors')
 const jwtSecret = 'MAKEITUNUVERSAL'
+const cors = require('cors')
+
+// app.options('*', cors())
+// app.use(cors())
 
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", req.headers.origin)
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
     next()
 })
 
-app.use(cors())
-app.options('/secure/', cors())
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`, {
         cookie: req.headers.cookie,

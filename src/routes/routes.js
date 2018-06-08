@@ -5,7 +5,6 @@ const mongoose = require('mongoose')
 const avocatModel = require('../models/avocat.js')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const authCheck = require('../middlewares/authCheck.js')
 
 const jwtSecret = 'MAKEITUNUVERSAL'
 
@@ -69,11 +68,13 @@ router.post('/login', (req, res, next) => {
 router.get('/secure', (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1]
     jwt.verify(token, jwtSecret, function (err, decoded) {
+        console.log('token verify')
         if (err) {
-            console.log('error')
-            res.redirect('http://localhost:3000/login')
-        } else {
-            next()
+            console.log(err)
+            res.json('notlogged')
+        } else if (err === null) {
+            console.log(true)
+            res.json('logged')
         }
     })
 })
