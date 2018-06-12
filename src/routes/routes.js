@@ -3,6 +3,7 @@ const router = express.Router()
 const app = express()
 const mongoose = require('mongoose')
 const avocatModel = require('../models/avocat.js')
+const missionModel = require('../models/mission.js')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
@@ -77,6 +78,29 @@ router.get('/secure', (req, res, next) => {
             res.json('logged')
         }
     })
+})
+
+
+// POST NEW MISSION
+
+router.post('/newmission', function (req, next) {
+
+    let newMission = new missionModel({
+        name: req.body.name, //req.body.mission.name .mission à vérifier avec front
+        field: req.body.field,
+        deadline: req.body.deadline,
+        price: req.body.price,
+        description: req.body.description,
+        author: req.body.author
+    })
+    newMission
+        .save()
+        .then(doc => {
+            console.log(doc)
+        })
+        .catch(err => {
+            console.error(err)
+        })
 })
 
 
