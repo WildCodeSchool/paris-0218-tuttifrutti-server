@@ -38,8 +38,7 @@ let avocatSchema = new mongoose.Schema({
         required: true
     },
     toque: {
-        type: String,
-        required: true
+        type: String
     },
     field: {
         type: String,

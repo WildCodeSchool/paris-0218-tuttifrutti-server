@@ -42,7 +42,7 @@ router.post('/login', (req, res, next) => {
         .findOne({
             email: req.body.creds.email
         }, function (err, user) {
-            if (err) 
+            if (err)
                 return next(err)
 
             bcrypt
@@ -54,7 +54,7 @@ router.post('/login', (req, res, next) => {
                             username: user.email
                         }, jwtSecret)
                         console.log(token)
-                        res.json({token})
+                        res.json({ token })
                     }
                     if (result === false) {
                         console.log(err)
@@ -86,12 +86,12 @@ router.get('/secure', (req, res, next) => {
 router.post('/newmission', function (req, next) {
 
     let newMission = new missionModel({
-        name: req.body.name, //req.body.mission.name .mission à vérifier avec front
-        field: req.body.field,
-        deadline: req.body.deadline,
-        price: req.body.price,
-        description: req.body.description,
-        author: req.body.author
+        name: req.body.mission.name,
+        field: req.body.mission.field,
+        deadline: req.body.mission.deadline,
+        price: req.body.mission.price,
+        description: req.body.mission.description,
+        author: req.body.mission.author
     })
     newMission
         .save()
