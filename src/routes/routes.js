@@ -103,5 +103,44 @@ router.post('/newmission', function (req, next) {
         })
 })
 
+// GET CURRENT MISSIONS
+router.get('/mission', (req, res, next) => {
+    missionModel.find({}, (err, missions) => {
+        res.json(missions)
+    })
+})
+
+// GET ONE CURRENT MISSION
+router.get('/mission/:missionId', (req, res, next) => {
+    missionModel.findById(req.params.missionId, (err, mission) => {
+        res.json(mission)
+    })
+})
+
+// EDIT ONE MISSION
+router.put('/mission/:missionId', (req, res, next) => {
+    missionModel.findById(req.params.missionId, (err, mission) => {
+        mission.name = req.body.name;
+        mission.deadline = req.body.deadline;
+        mission.description = req.body.description;
+        mission.save()
+        res.json(mission)
+    })
+})
+
+// DELETE ONE MISSION
+router.delete('/mission/:missionId', (req, res, next) => {
+    missionModel.findById(req.params.missionId, (err, mission) => {
+        mission.remove(err => {
+            if (err) {
+                res.status(500).send(err)
+            }
+            else {
+                res.status(204).send('removed')
+            }
+        })
+
+    })
+})
 
 module.exports = router
