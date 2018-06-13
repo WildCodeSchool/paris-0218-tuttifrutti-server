@@ -85,7 +85,7 @@ router.get('/secure', (req, res, next) => {
 
 router.post('/newmission', function (req, next) {
 
-    let newMission = new missionModel({
+    let newMission = new missionModel({      
         name: req.body.mission.name,
         field: req.body.mission.field,
         deadline: req.body.mission.deadline,
