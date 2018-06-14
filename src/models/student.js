@@ -22,22 +22,11 @@ let studentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  cabinet: {
-    type: String
-  },
   phone: {
     type: Number,
     required: true
   },
-  address: {
-    type: String,
-    required: true
-  },
-  zipCode: {
-    type: Number,
-    required: true
-  },
-  toque: {
+  levelStudy: {
     type: String,
     required: true
   },
@@ -59,4 +48,4 @@ studentSchema.pre('save', function (next) {
   })
 })
 
-module.exports = mongoose.model('Avocat', studentSchema)
+module.exports = mongoose.model('Student', studentSchema)

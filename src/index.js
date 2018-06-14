@@ -1,7 +1,7 @@
 const express = require('express')
 // const router = express.Router()
 const app = express()
-// const database = require('./database.js')
+const database = require('./database.js')
 const bodyParser = require('body-parser')
 const routes = require('./routes/routes.js')
 // const jwtSecret = 'MAKEITUNUVERSAL'
