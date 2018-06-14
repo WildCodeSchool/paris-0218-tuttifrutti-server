@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
-const avocatModel = require('../models/avocat.js')
-const missionModel = require('../models/mission.js')
-const studentModel = require('../models/student.js')
+const AvocatModel = require('../models/avocat.js')
+const MissionModel = require('../models/mission.js')
+const StudentModel = require('../models/student.js')
 const bcrypt = require('bcrypt-promise')
 const jwt = require('jsonwebtoken')
 const jwtSecret = 'MAKEITUNUVERSAL'
@@ -11,8 +11,8 @@ const jwtSecret = 'MAKEITUNUVERSAL'
 // POST Registration Student
 
 router.post('/regstudent', function (req, res, next) {
-  const newStudent = new studentModel(req.body.user)
-  
+  const newStudent = new StudentModel(req.body.user)
+
   newStudent.save()
     .then(doc => res.json('ok'))
     .catch(next)
@@ -21,8 +21,8 @@ router.post('/regstudent', function (req, res, next) {
 // POST Registration Avocat
 
 router.post('/reg', function (req, res, next) {
-  const newAvocat = new avocatModel(req.body.user)
-  
+  const newAvocat = new AvocatModel(req.body.user)
+
   newAvocat.save()
     .then(doc => res.json('ok'))
     .catch(next)
@@ -31,7 +31,7 @@ router.post('/reg', function (req, res, next) {
 // POST Login Student
 
 router.post('/loginStudent', async (req, res, next) => {
-  const user = await studentModel.findOne({ email: req.body.creds.email })
+  const user = await StudentModel.findOne({ email: req.body.creds.email })
 
   const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
   if (isEqual) {
@@ -39,7 +39,7 @@ router.post('/loginStudent', async (req, res, next) => {
       id: user._id,
       username: user.email
     }, jwtSecret)
-    
+
     res.json({ token })
   } else {
     return next(Error('Wrong Password'))
@@ -49,7 +49,7 @@ router.post('/loginStudent', async (req, res, next) => {
 // POST Login avocat
 
 router.post('/login', async (req, res, next) => {
-  const user = await avocatModel.findOne({ email: req.body.creds.email })
+  const user = await AvocatModel.findOne({ email: req.body.creds.email })
 
   const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
   if (isEqual) {
@@ -57,7 +57,7 @@ router.post('/login', async (req, res, next) => {
       id: user._id,
       username: user.email
     }, jwtSecret)
-    
+
     res.json({ token })
   } else {
     return next(Error('Wrong Password'))
@@ -76,8 +76,8 @@ router.get('/secure', (req, res, next) => {
 
 // Create mission
 router.post('/missions', function (req, res, next) {
-  const newMission = new missionModel(req.body.mission)
-  
+  const newMission = new MissionModel(req.body.mission)
+
   newMission.save()
     .then(doc => res.json('ok'))
     .catch(next)
@@ -85,14 +85,14 @@ router.post('/missions', function (req, res, next) {
 
 // Read missions
 router.get('/missions', (req, res, next) => {
-  missionModel.find()
+  MissionModel.find()
     .then(missions => res.json(missions))
     .catch(next)
 })
 
 // GET ONE CURRENT MISSION
 router.get('/missions/:missionId', (req, res, next) => {
-  missionModel.findById(req.params.missionId)
+  MissionModel.findById(req.params.missionId)
     .then(mission => res.json(mission))
     .catch(next)
 })
@@ -101,14 +101,14 @@ router.get('/missions/:missionId', (req, res, next) => {
 router.put('/missions/:missionId', (req, res, next) => {
   const update = req.body
 
-  missionModel.findByIdAndUpdate(req.params.missionId, { $set: update })
+  MissionModel.findByIdAndUpdate(req.params.missionId, { $set: update })
     .then(() => res.json('ok'))
     .catch(next)
 })
 
 // DELETE ONE MISSION
 router.delete('/missions/:missionId', (req, res, next) => {
-  missionModel.findByIdAndRemove(req.params.missionId)
+  MissionModel.findByIdAndRemove(req.params.missionId)
     .then(() => res.json('ok'))
     .catch(next)
 })
