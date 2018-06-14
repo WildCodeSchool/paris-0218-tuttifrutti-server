@@ -1,6 +1,7 @@
-const mongoose = require('mongoose')
-// const avocatModel = require('./models/avocat.js')
-const server = 'mongodb://root:root@ds233320.mlab.com:33320/tutti-frutti'
+const mongoose = require('mongoose');
+const avocatModel = require('./models/avocat.js')
+const missionModel = require('./models/mission.js')
+const server = 'mongodb://root:root@ds233320.mlab.com:33320/tutti-frutti';
 
 class Database {
   constructor () {

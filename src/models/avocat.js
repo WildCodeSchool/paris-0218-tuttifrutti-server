@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
 let avocatSchema = new mongoose.Schema({
-
   email: {
     type: String,
     required: true,
@@ -38,8 +37,7 @@ let avocatSchema = new mongoose.Schema({
     required: true
   },
   toque: {
-    type: String,
-    required: true
+    type: String
   },
   field: {
     type: String,
