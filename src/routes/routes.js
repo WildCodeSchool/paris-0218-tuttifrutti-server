@@ -1,146 +1,116 @@
 const express = require('express')
 const router = express.Router()
-const app = express()
-const mongoose = require('mongoose')
+
 const avocatModel = require('../models/avocat.js')
 const missionModel = require('../models/mission.js')
-const bcrypt = require('bcrypt')
+const studentModel = require('../models/student.js')
+const bcrypt = require('bcrypt-promise')
 const jwt = require('jsonwebtoken')
-
 const jwtSecret = 'MAKEITUNUVERSAL'
 
-// POST Registration
-router.post('/reg', function (req, next) {
+// POST Registration Student
 
-    let newUser = new avocatModel({
-        email: req.body.user.email,
-        password: req.body.user.password,
-        firstName: req.body.user.firstName,
-        lastName: req.body.user.lastName,
-        cabinet: req.body.user.cabinet,
-        phone: req.body.user.phone,
-        address: req.body.user.address,
-        zipCode: req.body.user.zipCode,
-        toque: req.body.user.toque,
-        field: req.body.user.field
-    })
-    newUser
-        .save()
-        .then(doc => {
-            console.log(doc)
-        })
-        .catch(err => {
-            console.error(err)
-        })
+router.post('/regstudent', function (req, res, next) {
+  const newStudent = new studentModel(req.body.user)
+  
+  newStudent.save()
+    .then(doc => res.json('ok'))
+    .catch(next)
 })
 
-// POST Login
+// POST Registration Avocat
 
-router.post('/login', (req, res, next) => {
-
-    avocatModel
-        .findOne({
-            email: req.body.creds.email
-        }, function (err, user) {
-            if (err)
-                return next(err)
-
-            bcrypt
-                .compare(req.body.creds.password, user.password, function (err, result) {
-                    if (result === true) {
-                        console.log(result)
-                        const token = jwt.sign({
-                            id: user._id,
-                            username: user.email
-                        }, jwtSecret)
-                        console.log(token)
-                        res.json({ token })
-                    }
-                    if (result === false) {
-                        console.log(err)
-                        console.log('wrong password')
-                        return next(Error('Wrong Password'))
-                    }
-                })
-        })
+router.post('/reg', function (req, res, next) {
+  const newAvocat = new avocatModel(req.body.user)
+  
+  newAvocat.save()
+    .then(doc => res.json('ok'))
+    .catch(next)
 })
+
+// POST Login Student
+
+router.post('/loginStudent', async (req, res, next) => {
+  const user = await studentModel.findOne({ email: req.body.creds.email })
+
+  const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
+  if (isEqual) {
+    const token = jwt.sign({
+      id: user._id,
+      username: user.email
+    }, jwtSecret)
+    
+    res.json({ token })
+  } else {
+    return next(Error('Wrong Password'))
+  }
+})
+
+// POST Login avocat
+
+router.post('/login', async (req, res, next) => {
+  const user = await avocatModel.findOne({ email: req.body.creds.email })
+
+  const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
+  if (isEqual) {
+    const token = jwt.sign({
+      id: user._id,
+      username: user.email
+    }, jwtSecret)
+    
+    res.json({ token })
+  } else {
+    return next(Error('Wrong Password'))
+  }
+})
+
 // Route to Auth?
 
 router.get('/secure', (req, res, next) => {
-    const token = req.headers.authorization.split(" ")[1]
-    jwt.verify(token, jwtSecret, function (err, decoded) {
-        console.log('token verify')
-        if (err) {
-            console.log(err)
-            res.json('notlogged')
-        } else if (err === null) {
-            console.log(true)
-            res.json('logged')
-        }
-    })
+  const token = req.headers.authorization.split(' ')[1]
+
+  jwt.verify(token, jwtSecret)
+    .then(() => res.json('ok'))
+    .catch(next)
 })
 
-
-// POST NEW MISSION
-
-router.post('/newmission', function (req, next) {
-
-    let newMission = new missionModel({      
-        name: req.body.mission.name,
-        field: req.body.mission.field,
-        deadline: req.body.mission.deadline,
-        price: req.body.mission.price,
-        description: req.body.mission.description,
-        author: req.body.mission.author
-    })
-    newMission
-        .save()
-        .then(doc => {
-            console.log(doc)
-        })
-        .catch(err => {
-            console.error(err)
-        })
+// Create mission
+router.post('/missions', function (req, res, next) {
+  const newMission = new missionModel(req.body.mission)
+  
+  newMission.save()
+    .then(doc => res.json('ok'))
+    .catch(next)
 })
 
-// GET CURRENT MISSIONS
-router.get('/mission', (req, res, next) => {
-    missionModel.find({}, (err, missions) => {
-        res.json(missions)
-    })
+// Read missions
+router.get('/missions', (req, res, next) => {
+  missionModel.find()
+    .then(missions => res.json(missions))
+    .catch(next)
 })
 
 // GET ONE CURRENT MISSION
-router.get('/mission/:missionId', (req, res, next) => {
-    missionModel.findById(req.params.missionId, (err, mission) => {
-        res.json(mission)
-    })
+router.get('/missions/:missionId', (req, res, next) => {
+  missionModel.findById(req.params.missionId)
+    .then(mission => res.json(mission))
+    .catch(next)
 })
 
 // EDIT ONE MISSION
-router.put('/mission/:missionId', (req, res, next) => {
-    missionModel.findById(req.params.missionId, (err, mission) => {
-        mission.name = req.body.name;
-        mission.deadline = req.body.deadline;
-        mission.description = req.body.description;
-        mission.save()
-        res.json(mission)
-    })
+router.put('/missions/:missionId', (req, res, next) => {
+  const update = req.body
+
+  missionModel.findByIdAndUpdate(req.params.missionId, { $set: update })
+    .then(() => res.json('ok'))
+    .catch(next)
 })
 
 // DELETE ONE MISSION
-router.delete('/mission/:missionId', (req, res, next) => {
-    missionModel.findById(req.params.missionId, (err, mission) => {
-        mission.remove(err => {
-            if (err) {
-                res.status(500).send(err)
-            }
-            else {
-                res.status(204).send('removed')
-            }
-        })
-
-    })
+router.delete('/missions/:missionId', (req, res, next) => {
+  missionModel.findByIdAndRemove(req.params.missionId)
+    .then(() => res.json('ok'))
+    .catch(next)
 })
 
 module.exports = router

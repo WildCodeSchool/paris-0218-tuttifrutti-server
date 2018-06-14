@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 // const validator = require('validator')
 const bcrypt = require('bcrypt')
 
-let avocatSchema = new mongoose.Schema({
+let studentSchema = new mongoose.Schema({
+
   email: {
     type: String,
     required: true,
@@ -21,23 +22,13 @@ let avocatSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  cabinet: {
-    type: String
-  },
   phone: {
     type: Number,
     required: true
   },
-  address: {
+  levelStudy: {
     type: String,
     required: true
-  },
-  zipCode: {
-    type: Number,
-    required: true
-  },
-  toque: {
-    type: String
   },
   field: {
     type: String,
@@ -46,15 +37,15 @@ let avocatSchema = new mongoose.Schema({
 })
 
 // hashing a password before saving it to the database
-avocatSchema.pre('save', function (next) {
-  let avocat = this
-  bcrypt.hash(avocat.password, 16, function (err, hash) {
+studentSchema.pre('save', function (next) {
+  let student = this
+  bcrypt.hash(student.password, 16, function (err, hash) {
     if (err) {
       return next(err)
     }
-    avocat.password = hash
+    student.password = hash
     next()
   })
 })
 
-module.exports = mongoose.model('Avocat', avocatSchema)
+module.exports = mongoose.model('Student', studentSchema)
