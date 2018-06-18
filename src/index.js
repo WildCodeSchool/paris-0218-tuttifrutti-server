@@ -1,8 +1,8 @@
 const express = require('express')
 const app = express()
-const database = require('./database.js')
 const bodyParser = require('body-parser')
 const routes = require('./routes/routes.js')
+require('./database.js')
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')

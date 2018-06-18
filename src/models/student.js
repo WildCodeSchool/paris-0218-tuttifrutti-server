@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-// const validator = require('validator')
 const bcrypt = require('bcrypt')
 
 let studentSchema = new mongoose.Schema({

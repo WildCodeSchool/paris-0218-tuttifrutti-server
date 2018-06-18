@@ -32,17 +32,15 @@ router.post('/reg', function (req, res, next) {
 
 router.post('/loginStudent', async (req, res, next) => {
   const user = await StudentModel.findOne({ email: req.body.creds.email })
-
   const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
-  if (isEqual) {
+  if (isEqual === true) {
     const token = jwt.sign({
       id: user._id,
       username: user.email
     }, jwtSecret)
-
     res.json({ token })
   } else {
-    return next(Error('Wrong Password'))
+    return next(Error('error'))
   }
 })
 
@@ -50,14 +48,14 @@ router.post('/loginStudent', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   const user = await AvocatModel.findOne({ email: req.body.creds.email })
-
+  console.log(user)
+  if (user === null) { return res.json('error') }
   const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
   if (isEqual) {
     const token = jwt.sign({
       id: user._id,
       username: user.email
     }, jwtSecret)
-
     res.json({ token })
   } else {
     res.json('auth failed')
