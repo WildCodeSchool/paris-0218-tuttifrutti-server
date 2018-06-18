@@ -60,6 +60,7 @@ router.post('/login', async (req, res, next) => {
 
     res.json({ token })
   } else {
+    res.json('auth failed')
     return next(Error('Wrong Password'))
   }
 })
@@ -68,10 +69,16 @@ router.post('/login', async (req, res, next) => {
 
 router.get('/secure', (req, res, next) => {
   const token = req.headers.authorization.split(' ')[1]
-
-  jwt.verify(token, jwtSecret)
-    .then(() => res.json('ok'))
-    .catch(next)
+  jwt.verify(token, jwtSecret, function (err, decoded) {
+    console.log('token verify')
+    if (err) {
+      console.log(err)
+      res.json('notlogged')
+    } else if (err === null) {
+      console.log(true)
+      res.json('logged')
+    }
+  })
 })
 
 // Create mission

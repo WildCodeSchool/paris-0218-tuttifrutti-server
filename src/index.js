@@ -1,14 +1,8 @@
 const express = require('express')
-// const router = express.Router()
 const app = express()
 const database = require('./database.js')
 const bodyParser = require('body-parser')
 const routes = require('./routes/routes.js')
-// const jwtSecret = 'MAKEITUNUVERSAL'
-// const cors = require('cors')
-
-// app.options('*', cors())
-// app.use(cors())
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
