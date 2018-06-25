@@ -107,7 +107,7 @@ router.put('/missions/:missionId', (req, res, next) => {
   const update = req.body
 
   MissionModel.findByIdAndUpdate(req.params.missionId, { $set: update })
-    .then(() => res.json('ok'))
+    .then((mission) => res.json(mission))
     .catch(next)
 })
 
