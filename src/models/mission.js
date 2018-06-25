@@ -26,6 +26,9 @@ let missionSchema = new mongoose.Schema({
   },
   student: {
     type: String
+  },
+  finished: {
+    type: Boolean
   }
 })
 

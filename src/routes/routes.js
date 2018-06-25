@@ -118,4 +118,11 @@ router.delete('/missions/:missionId', (req, res, next) => {
     .catch(next)
 })
 
+// GET OLD MISSIONS should change filter later
+router.get('/oldmissions', (req, res, next) => {
+  MissionModel.find()
+    .then(missions => res.json(missions.filter(mission => mission.field === 'droit des affaires')))
+    .catch(next)
+})
+
 module.exports = router
