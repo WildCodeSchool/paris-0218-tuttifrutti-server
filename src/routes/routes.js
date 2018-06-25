@@ -91,7 +91,7 @@ router.post('/missions', function (req, res, next) {
 // Read missions
 router.get('/missions', (req, res, next) => {
   MissionModel.find()
-    .then(missions => res.json(missions))
+    .then(missions => res.json(missions.filter(mission => mission.finished === false)))
     .catch(next)
 })
 
@@ -118,10 +118,10 @@ router.delete('/missions/:missionId', (req, res, next) => {
     .catch(next)
 })
 
-// GET OLD MISSIONS should change filter later
+// GET OLD MISSIONS
 router.get('/oldmissions', (req, res, next) => {
   MissionModel.find()
-    .then(missions => res.json(missions.filter(mission => mission.field === 'droit des affaires')))
+    .then(missions => res.json(missions.filter(mission => mission.finished === true)))
     .catch(next)
 })
 
