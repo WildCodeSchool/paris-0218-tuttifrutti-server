@@ -88,6 +88,15 @@ router.post('/infolawyer', async (req, res, next) => {
   res.json(user)
 })
 
+// EDIT LAWYER INFO
+router.put('/infolawyer', (req, res, next) => {
+  const update = req.body
+
+  AvocatModel.findByIdAndUpdate(req.params._id, { $set: update })
+    .then((lawyer) => res.json(lawyer))
+    .catch(next)
+})
+
 // Create mission
 router.post('/missions', function (req, res, next) {
   const newMission = new MissionModel(req.body.mission)
