@@ -35,6 +35,10 @@ let avocatSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  city: {
+    type: String,
+    required: true
+  },
   toque: {
     type: String
   },

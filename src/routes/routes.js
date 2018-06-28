@@ -90,9 +90,10 @@ router.post('/infolawyer', async (req, res, next) => {
 
 // EDIT LAWYER INFO
 router.put('/infolawyer', (req, res, next) => {
-  const update = req.body
+  const update = req.body.user
+  console.log(update)
 
-  AvocatModel.findByIdAndUpdate(req.params._id, { $set: update })
+  AvocatModel.findByIdAndUpdate({_id: update.id}, { $set: update })
     .then((lawyer) => res.json(lawyer))
     .catch(next)
 })
