@@ -79,6 +79,15 @@ router.get('/secure', (req, res, next) => {
   })
 })
 
+// POST to get info avocat
+
+router.post('/infolawyer', async (req, res, next) => {
+  console.log(req.body.decoded.id)
+  const user = await AvocatModel.findOne({ _id: req.body.decoded.id })
+  console.log(user)
+  res.json(user)
+})
+
 // Create mission
 router.post('/missions', function (req, res, next) {
   const newMission = new MissionModel(req.body.mission)
