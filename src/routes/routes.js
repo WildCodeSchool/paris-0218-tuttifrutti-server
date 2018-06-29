@@ -20,8 +20,10 @@ router.post('/regstudent', function (req, res, next) {
 
 // POST Registration Avocat
 
-router.post('/reg', function (req, res, next) {
+router.post('/reg', async (req, res, next) => {
   const newAvocat = new AvocatModel(req.body.user)
+
+  newAvocat.password = await bcrypt.hash(newAvocat.password, 16)
 
   newAvocat.save()
     .then(doc => res.json('ok'))
@@ -89,9 +91,10 @@ router.post('/infolawyer', async (req, res, next) => {
 })
 
 // EDIT LAWYER INFO
-router.put('/infolawyer', (req, res, next) => {
+router.put('/infolawyer', async (req, res, next) => {
   const update = req.body.user
-  console.log(update)
+
+  update.password = await bcrypt.hash(update.password, 16)
 
   AvocatModel.findByIdAndUpdate({_id: update.id}, { $set: update })
     .then((lawyer) => res.json(lawyer))
