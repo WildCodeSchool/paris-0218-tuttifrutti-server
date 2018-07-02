@@ -55,19 +55,19 @@ router.use(bodyParser.urlencoded({ extended: true }))
 
 // Upload  de fichier
 router.post('/upload', upload.single('selectedFile'), (req, res) => {
-  /*
-    We now have a new req.file object here. At this point the file has been saved
-    and the req.file.filename value will be the name returned by the
-    filename() function defined in the diskStorage configuration. Other form fields
-    are available here in req.body.
-  */
+
   res.send()
 })
 
 // POST Registration Student
 
-router.post('/regstudent', function (req, res, next) {
+router.post('/regstudent', async (req, res, next) => {
+  console.log(req.body.user)
   const newStudent = new StudentModel(req.body.user)
+
+  newStudent.password = await bcrypt.hash(newStudent.password, 16)
+
+  console.log(newStudent)
 
   newStudent.save()
     .then(doc => res.json('ok'))
