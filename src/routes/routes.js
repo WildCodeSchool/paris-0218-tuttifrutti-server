@@ -149,12 +149,35 @@ router.post('/infolawyer', async (req, res, next) => {
 // EDIT LAWYER INFO
 router.put('/infolawyer', async (req, res, next) => {
   const update = req.body.user
+  console.log(update)
 
-  update.password = await bcrypt.hash(update.password, 16)
+  if (update.password && update.password !== '') {
+    console.log('password modifié', update)
+    update.password = await bcrypt.hash(update.password, 16)
+    console.log('password modifié apres crypt', update)
 
-  AvocatModel.findByIdAndUpdate({_id: update.id}, { $set: update })
-    .then((lawyer) => res.json(lawyer))
+    AvocatModel.findByIdAndUpdate({_id: update.id}, { $set: update })
+      .then((lawyer) => res.json(lawyer))
+      .catch(next)
+  } else {
+    console.log('password pas modifié', update)
+    AvocatModel.findByIdAndUpdate({_id: update.id}, { $set: {
+      email: update.email,
+      firstName: update.firstName,
+      lastName: update.lastName,
+      cabinet: update.cabinet,
+      phone: update.phone,
+      address: update.address,
+      city: update.city,
+      zipCode: update.zipCode,
+      toque: update.toque,
+      field: update.field
+    }
+  })
+    .then(lawyer => console.log(lawyer))
+    .then(lawyer => res.json(lawyer))
     .catch(next)
+  }
 })
 
 // Create mission
