@@ -185,27 +185,31 @@ router.post('/missions', function (req, res, next) {
   const newMission = new MissionModel(req.body.mission)
 
   newMission.save()
-    .then(doc => res.json('ok'))
+    .then(() => res.json('ok'))
     .catch(next)
 })
 
 // Read missions
-router.get('/missions', (req, res, next) => {
+router.post('/missionsfiltered', (req, res, next) => {
+  const lawyer = req.body.lawyerId
   MissionModel.find()
-    .then(missions => res.json(missions.filter(mission => mission.finished === false)))
+    .then(missions => res.json(missions
+      .filter(mission => mission.finished === false)
+      .filter(mission => mission.author === lawyer)
+    ))
     .catch(next)
 })
 
-// POST Upload file
-router.post('/missions/:missionId', upload.single('selectedFile'), (req, res) => {
-  /*
-    We now have a new req.file object here. At this point the file has been saved
-    and the req.file.filename value will be the name returned by the
-    filename() function defined in the diskStorage configuration. Other form fields
-    are available here in req.body.
-  */
-  res.send()
-})
+// // POST Upload file
+// router.post('/missions/:missionId', upload.single('selectedFile'), (req, res) => {
+//   /*
+//     We now have a new req.file object here. At this point the file has been saved
+//     and the req.file.filename value will be the name returned by the
+//     filename() function defined in the diskStorage configuration. Other form fields
+//     are available here in req.body.
+//   */
+//   res.send()
+// })
 
 // GET ONE CURRENT MISSION
 router.get('/missions/:missionId', (req, res, next) => {
@@ -231,9 +235,13 @@ router.delete('/missions/:missionId', (req, res, next) => {
 })
 
 // GET OLD MISSIONS
-router.get('/oldmissions', (req, res, next) => {
+router.post('/oldmissionsfiltered', (req, res, next) => {
+  const lawyer = req.body.lawyerId
   MissionModel.find()
-    .then(missions => res.json(missions.filter(mission => mission.finished === true)))
+    .then(missions => res.json(missions
+      .filter(mission => mission.finished === true)
+      .filter(mission => mission.author === lawyer)
+    ))
     .catch(next)
 })
 
