@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fieldSize: 1024 }
+  limits: { fileSize: 5*10**6  } // 5mo
 })
 
 // create the multer instance that will be used to upload/save the file
@@ -33,7 +33,7 @@ router.use(bodyParser.urlencoded({ extended: true }))
 
 // Upload  de fichier
 router.post('/upload', upload.single('selectedFile'), (req, res) => {
-  console.log(res)
+  console.dir(res, { depth: 0 })
   res.send({ result: 'ok' })
 })
 
@@ -43,6 +43,7 @@ router.use(function (err, req, res, next) {
     res.send({ result: 'fail', error: { code: 1001, message: 'File is too big' } })
     return
   }
+  next(err)
 })
 
 // POST Registration Student
