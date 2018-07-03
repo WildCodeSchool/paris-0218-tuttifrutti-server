@@ -21,9 +21,18 @@ const storage = multer.diskStorage({
   }
 })
 
+
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5*10**6  } // 5mo
+  limits: { fileSize: 5*10**6  }, // 5mo
+  fileFilter: function (req, file, cb) {
+    if (!file.originalname.toLowerCase().match(/\.(pdf|jpeg|jpg|doc|docx)$/)) {
+        return cb(new Error('Envoi de pdf, doc, docx, jpg ou jpeg  seulement'));
+    }
+    cb(null, true);
+  }
+
+
 })
 
 // create the multer instance that will be used to upload/save the file
