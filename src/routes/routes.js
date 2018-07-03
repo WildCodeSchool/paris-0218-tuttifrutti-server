@@ -185,7 +185,7 @@ router.post('/missions', function (req, res, next) {
   const newMission = new MissionModel(req.body.mission)
 
   newMission.save()
-    .then(() => res.json('ok'))
+    .then(() => res.json(newMission))
     .catch(next)
 })
 
