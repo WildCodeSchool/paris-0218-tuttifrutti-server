@@ -21,17 +21,15 @@ const storage = multer.diskStorage({
   }
 })
 
-
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5*10**6  }, // 5mo
+  limits: { fileSize: 5 * 10 ** 6 }, // 5mo
   fileFilter: function (req, file, cb) {
     if (!file.originalname.toLowerCase().match(/\.(pdf|jpeg|jpg|doc|docx)$/)) {
-        return cb(new Error('Envoi de pdf, doc, docx, jpg ou jpeg  seulement'));
+      return cb(Error('Envoi de pdf, doc, docx, jpg ou jpeg seulement'))
     }
-    cb(null, true);
+    cb(null, true)
   }
-
 
 })
 
@@ -49,7 +47,9 @@ router.post('/upload', upload.single('selectedFile'), (req, res) => {
 // Handle any other errors
 router.use(function (err, req, res, next) {
   if (err.code === 'LIMIT_FILE_SIZE') {
-    res.send({ result: 'fail', error: { code: 1001, message: 'File is too big' } })
+    console.log("fail")
+    res.send({ result: 'fail', error: { code: 1001, message: 'File is too big' } }
+    )
     return
   }
   next(err)
@@ -164,7 +164,7 @@ router.put('/infolawyer', async (req, res, next) => {
       toque: update.toque,
       field: update.field
     }
-})
+    })
       .then(lawyer => console.log(lawyer))
       .then(lawyer => res.json(lawyer))
       .catch(next)
