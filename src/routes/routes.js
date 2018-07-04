@@ -10,6 +10,7 @@ const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser')
 const multer = require('multer')
 const uuidv4 = require('uuid/v4')
+
 // const path = require('path') Generate test SMTP service account from
 // ethereal.email Only needed if you don't have a real mail account for testing
 // create reusable transporter object using the default SMTP transport
@@ -21,6 +22,7 @@ const transporter = nodemailer.createTransport({
         pass: 'bVWMcjVnQenkaJsGz4'
     }
 });
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -40,13 +42,23 @@ router.use(bodyParser.urlencoded({extended: true}))
 
 // Upload  de fichier
 router.post('/upload', upload.single('selectedFile'), (req, res) => {
+
     res.json('sucess')
+
 })
 
 // POST Registration Student
 
-router.post('/regstudent', function (req, res, next) {
+
+
+router.post('/regstudent', async(req, res, next) => {
+    console.log(req.body.user)
     const newStudent = new StudentModel(req.body.user)
+
+    newStudent.password = await bcrypt.hash(newStudent.password, 16)
+
+    console.log(newStudent)
+
     newStudent
         .save()
         .then(doc => res.json('ok'))
@@ -177,41 +189,111 @@ router.post('/infolawyer', async(req, res, next) => {
 // EDIT LAWYER INFO
 router.put('/infolawyer', async(req, res, next) => {
     const update = req.body.user
+    console.log(update)
 
-    update.password = await bcrypt.hash(update.password, 16)
+    if (update.password && update.password !== '') {
+        console.log('password modifié', update)
+        update.password = await bcrypt.hash(update.password, 16)
+        console.log('password modifié apres crypt', update)
 
-    AvocatModel.findByIdAndUpdate({
-        _id: update.id
-    }, {$set: update}).then((lawyer) => res.json(lawyer)).catch(next)
+        AvocatModel.findByIdAndUpdate({
+            _id: update.id
+        }, {$set: update}).then((lawyer) => res.json(lawyer)).catch(next)
+    } else {
+        console.log('password pas modifié', update)
+        AvocatModel.findByIdAndUpdate({
+            _id: update.id
+        }, {
+                $set: {
+                    email: update.email,
+                    firstName: update.firstName,
+                    lastName: update.lastName,
+                    cabinet: update.cabinet,
+                    phone: update.phone,
+                    address: update.address,
+                    city: update.city,
+                    zipCode: update.zipCode,
+                    toque: update.toque,
+                    field: update.field
+                }
+            })
+            .then(lawyer => console.log(lawyer))
+            .then(lawyer => res.json(lawyer))
+            .catch(next)
+    }
 })
 
 // Create mission
 router.post('/missions', function (req, res, next) {
     const newMission = new MissionModel(req.body.mission)
-
+    console.log(req.body.mission)
     newMission
         .save()
-        .then(doc => res.json('ok'))
-        .catch(next)
-})
+        .then(() => res.json(newMission))
+        .then(() => {
+            console.log('trigger')
+            StudentModel
+                .find()
+                .then(async students => {
+                    let emails = []
+                    let names = []
+                    const studentList = students.filter(students => students.field === req.body.mission.field)
+                    for (let key in studentList) {
+                        if (studentList.hasOwnProperty(key)) {
+                            emails.push(studentList[key].email)
+                            names.push(studentList[key].email)
 
-// Read missions
-router.get('/missions', (req, res, next) => {
-    MissionModel
-        .find()
-        .then(missions => res.json(missions.filter(mission => mission.finished === false)))
-        .catch(next)
+                        }
+                    }
+                    console.log(emails)
+
+                    
+                    // setup email data with unicode symbols
+                    let mailOptions = {
+                        from: 'tester@gmail.com', // sender address
+                        to: `${email}`, // list of receivers
+                        subject: 'Proposition de mission', // Subject line
+                        text: 
+                                              
+                        `Bonjour,
+  
+                        Une nouvelle mission est disponible en ${req.body.mission.field}
+                        La description de la mission est la suivante: ${req.body.mission.field}
+                         //insérer un bouton//
+                         ${link}
+            
+              
+              Merci,
+              
+              L’équipe de LITTA`
+                    }
+
+                    // send mail with defined transport object
+                    transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                            return console.log(error)
+                        }
+                        console.log('Message sent: %s', info.messageId)
+                        // Preview only available when sending through an Ethereal account
+                        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
+                    })
+                })
+                .catch(next)
+        })
 })
 
 // POST Upload file
 router.post('/missions/:missionId', upload.single('selectedFile'), (req, res) => {
-    /*
-    We now have a new req.file object here. At this point the file has been saved
-    and the req.file.filename value will be the name returned by the
-    filename() function defined in the diskStorage configuration. Other form fields
-    are available here in req.body.
-  */
     res.send()
+})
+
+// Read missions
+router.post('/missionsfiltered', (req, res, next) => {
+    const lawyer = req.body.lawyerId
+    MissionModel
+        .find()
+        .then(missions => res.json(missions.filter(mission => mission.finished === false).filter(mission => mission.author === lawyer)))
+        .catch(next)
 })
 
 // GET ONE CURRENT MISSION
@@ -241,10 +323,12 @@ router.delete('/missions/:missionId', (req, res, next) => {
 })
 
 // GET OLD MISSIONS
-router.get('/oldmissions', (req, res, next) => {
+
+router.post('/oldmissionsfiltered', (req, res, next) => {
+    const lawyer = req.body.lawyerId
     MissionModel
         .find()
-        .then(missions => res.json(missions.filter(mission => mission.finished === true)))
+        .then(missions => res.json(missions.filter(mission => mission.finished === true).filter(mission => mission.author === lawyer)))
         .catch(next)
 })
 
