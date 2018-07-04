@@ -275,23 +275,23 @@ router.post('/missions', function (req, res, next) {
                     }
                     console.log(`Number of potential students: ${emails.length}`)
                     for (let i = 0; i < emails.length; i++) {
-                        let link = `http://localhost:3030/accept/${newMission._id}/${ids[i]}`
+                        let link = `http://localhost:3000/accept/${newMission._id}/${ids[i]}`
                         // setup email data with unicode symbols
                         let mailOptions = {
                             from: 'tester@gmail.com', // sender address
                             to: `${emails[i]}`, // list of receivers
                             subject: 'Proposition de mission', // Subject line
                             text: `Bonjour,
-			
+
 															Une nouvelle mission est disponible en ${req.body.mission.field}
-															La description de la mission est la suivante: 
+															La description de la mission est la suivante:
 															${req.body.mission.description}
 
 
 															 //insérer un bouton//
 															 ${link}
 															Merci,
-			
+
 															L’équipe de LITTA`
                         }
 
