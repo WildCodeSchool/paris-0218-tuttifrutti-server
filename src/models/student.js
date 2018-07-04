@@ -33,22 +33,14 @@ let studentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  active: {
+  activated: {
+    type: Boolean,
+    required: true
+  },
+  approved: {
     type: Boolean,
     required: true
   }
 })
-
-// hashing a password before saving it to the database
-// studentSchema.pre('save', function (next) {
-//   let student = this
-//   bcrypt.hash(student.password, 16, function (err, hash) {
-//     if (err) {
-//       return next(err)
-//     }
-//     student.password = hash
-//     next()
-//   })
-// })
 
 module.exports = mongoose.model('Student', studentSchema)

@@ -6,10 +6,9 @@ const StudentModel = require('../models/student.js')
 const bcrypt = require('bcrypt-promise')
 const jwt = require('jsonwebtoken')
 const jwtSecret = 'MAKEITUNUVERSAL'
-const nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer')
 const bodyParser = require('body-parser')
 const multer = require('multer')
-const uuidv4 = require('uuid/v4')
 
 // const path = require('path') Generate test SMTP service account from
 // ethereal.email Only needed if you don't have a real mail account for testing
@@ -22,7 +21,6 @@ const transporter = nodemailer.createTransport({
         pass: 'bVWMcjVnQenkaJsGz4'
     }
 });
-
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -49,22 +47,46 @@ router.post('/upload', upload.single('selectedFile'), (req, res) => {
 
 // POST Registration Student
 
-
-
 router.post('/regstudent', async(req, res, next) => {
-    console.log(req.body.user)
-    const newStudent = new StudentModel(req.body.user)
 
+    const newStudent = await new StudentModel(req.body.user)
     newStudent.password = await bcrypt.hash(newStudent.password, 16)
 
-    console.log(newStudent)
-
-    newStudent
+    await newStudent
         .save()
-        .then(doc => res.json('ok'))
+        .then(res.json('ok'))
+        .then(async() => {
+            const user = await StudentModel.findOne({email: req.body.user.email})
+            let link = await `http://localhost:3030/confirmation/student/${user._id}`
+
+            // setup email data with unicode symbols
+            let mailOptions = {
+                from: 'tester@gmail.com', // sender address
+                to: `${req.body.user.email}`, // list of receivers
+                subject: 'Confirmez votre adresse mail', // Subject line
+                text: `Cheres Etudiant,
+
+							Afin de validez votre inscription sur LITTA en attendant la validation d'un administrateur, merci de cliquer sur le lien suivant :
+
+							${link}
+
+							Merci,
+
+							L’équipe de LITTA`
+            };
+
+            // send mail with defined transport object
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return console.log(error);
+                }
+                console.log('Message sent: %s', info.messageId);
+                // Preview only available when sending through an Ethereal account
+                console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            })
+        })
         .catch(next)
 })
-
 // POST Registration Avocat
 
 router.post('/reg', async(req, res, next) => {
@@ -75,11 +97,11 @@ router.post('/reg', async(req, res, next) => {
     await newAvocat
         .save()
         .then(res.json('ok'))
-        .then(async () => {
+        .then(async() => {
             const user = await AvocatModel.findOne({email: req.body.user.email})
-            await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()})
-            const user2 = await AvocatModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3030/confirmation/${user2.uuid}`
+            // await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
+            // await AvocatModel.findOne({email: req.body.user.email})
+            let link = await `http://localhost:3030/confirmation/avocat/${user._id}` // attention backend a changer -Dan
 
             // setup email data with unicode symbols
             let mailOptions = {
@@ -87,13 +109,13 @@ router.post('/reg', async(req, res, next) => {
                 to: `${req.body.user.email}`, // list of receivers
                 subject: 'Confirmez votre adresse mail', // Subject line
                 text: `Maître,
-    
+
                 Afin de validez votre inscription sur LITTA, merci de cliquer sur le lien suivant :
-                
+
                 ${link}
-                
+
                 Merci,
-                
+
                 L’équipe de LITTA`
             };
 
@@ -108,17 +130,24 @@ router.post('/reg', async(req, res, next) => {
             })
         })
         .catch(next)
-
-        // const mail =
 })
 
-// Mail Confirm Get
-router.get('/confirmation/:uuid', async (req, res) => {
+// Mail Confirm Get Advocat
+router.get('/confirmation/avocat/:uuid', async(req, res) => {
 
-  console.log(req.params.uuid)
-  const query = await { uuid: `${req.params.uuid}` }
-  await AvocatModel.findOneAndUpdate(query, { activated: true })
-  res.json('testing')
+    console.log(req.params.uuid)
+    const query = await {uuid: `${req.params.uuid}`}
+    await AvocatModel.findOneAndUpdate(query, {activated: true})
+    res.json('testing')
+})
+
+// Mail Confirm Get Student
+router.get('/confirmation/student/:uuid', async(req, res) => {
+
+    console.log(req.params.uuid)
+    const query = await {uuid: `${req.params.uuid}`}
+    await StudentModel.findOneAndUpdate(query, {activated: true})
+    res.json('testing')
 })
 
 // POST Login Student
@@ -236,50 +265,65 @@ router.post('/missions', function (req, res, next) {
                 .find()
                 .then(async students => {
                     let emails = []
-                    let names = []
+                    let ids = []
                     const studentList = students.filter(students => students.field === req.body.mission.field)
                     for (let key in studentList) {
                         if (studentList.hasOwnProperty(key)) {
                             emails.push(studentList[key].email)
-                            names.push(studentList[key].email)
-
+                            ids.push(studentList[key]._id)
                         }
                     }
-                    console.log(emails)
+                    console.log(`Number of potential students: ${emails.length}`)
+                    for (let i = 0; i < emails.length; i++) {
+                        let link = `http://localhost:3030/accept/${newMission._id}/${ids[i]}`
+                        // setup email data with unicode symbols
+                        let mailOptions = {
+                            from: 'tester@gmail.com', // sender address
+                            to: `${emails[i]}`, // list of receivers
+                            subject: 'Proposition de mission', // Subject line
+                            text: `Bonjour,
+			
+															Une nouvelle mission est disponible en ${req.body.mission.field}
+															La description de la mission est la suivante: 
+															${req.body.mission.description}
 
-                    
-                    // setup email data with unicode symbols
-                    let mailOptions = {
-                        from: 'tester@gmail.com', // sender address
-                        to: `${email}`, // list of receivers
-                        subject: 'Proposition de mission', // Subject line
-                        text: 
-                                              
-                        `Bonjour,
-  
-                        Une nouvelle mission est disponible en ${req.body.mission.field}
-                        La description de la mission est la suivante: ${req.body.mission.field}
-                         //insérer un bouton//
-                         ${link}
-            
-              
-              Merci,
-              
-              L’équipe de LITTA`
+
+															 //insérer un bouton//
+															 ${link}
+															Merci,
+			
+															L’équipe de LITTA`
+                        }
+
+                        // send mail with defined transport object
+                        transporter.sendMail(mailOptions, (error, info) => {
+                            if (error) {
+                                return console.log(error)
+                            }
+                            console.log('Message sent: %s', info.messageId)
+                            // Preview only available when sending through an Ethereal account
+                            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
+                        })
                     }
 
-                    // send mail with defined transport object
-                    transporter.sendMail(mailOptions, (error, info) => {
-                        if (error) {
-                            return console.log(error)
-                        }
-                        console.log('Message sent: %s', info.messageId)
-                        // Preview only available when sending through an Ethereal account
-                        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
-                    })
                 })
                 .catch(next)
         })
+})
+
+// GET Accept Mission
+
+router.get('/accept/:mission/:uuid', async(req, res) => {
+    const queryStudent = await {_id: `${req.params.uuid}`}
+    const queryMission = await {_id: `${req.params.mission}`}
+    await MissionModel.find(queryMission, async (err, result) => {
+        if (result[0].student === '') {
+						await MissionModel.findOneAndUpdate(queryMission, {student: queryStudent}),
+            res.json('mission accepted')
+        } else {
+            res.json('mission already taken')
+        }
+    });
 })
 
 // POST Upload file

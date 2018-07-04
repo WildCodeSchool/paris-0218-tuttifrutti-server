@@ -49,11 +49,7 @@ let avocatSchema = new mongoose.Schema({
   activated: {
     type: Boolean,
     required: true
-  },
-  uuid: {
-    type: String
   }
-
 })
 
 // hashing a password before saving it to the database
