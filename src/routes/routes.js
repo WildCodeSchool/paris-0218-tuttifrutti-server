@@ -9,6 +9,29 @@ const jwtSecret = 'MAKEITUNUVERSAL'
 const nodemailer = require('nodemailer')
 const bodyParser = require('body-parser')
 const multer = require('multer')
+const uuidv4 = require('uuid/v4')
+const path = require('path')
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'tmp/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now())
+  }
+})
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 10 ** 6 }, // 5mo
+  fileFilter: function (req, file, cb) {
+    if (!file.originalname.toLowerCase().match(/\.(pdf|jpeg|jpg|doc|docx)$/)) {
+      return cb(Error('Envoi de pdf, doc, docx, jpg ou jpeg seulement'))
+    }
+    cb(null, true)
+  }
+
+})
 
 // const path = require('path') Generate test SMTP service account from
 // ethereal.email Only needed if you don't have a real mail account for testing
@@ -22,27 +45,26 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'tmp/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now())
-    }
-})
-
-const upload = multer({storage: storage})
-
 // create the multer instance that will be used to upload/save the file
 
 router.use(bodyParser.json())
-router.use(bodyParser.urlencoded({extended: true}))
+router.use(bodyParser.urlencoded({ extended: true }))
 
 // Upload  de fichier
 router.post('/upload', upload.single('selectedFile'), (req, res) => {
+  console.dir(res, { depth: 0 })
+  res.send({ result: 'ok' })
+})
 
-    res.json('sucess')
-
+// Handle any other errors
+router.use(function (err, req, res, next) {
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    console.log("fail")
+    res.send({ result: 'fail', error: { code: 1001, message: 'File is too big' } }
+    )
+    return
+  }
+  next(err)
 })
 
 // POST Registration Student
@@ -324,11 +346,6 @@ router.get('/accept/:mission/:uuid', async(req, res) => {
             res.send(`La mission n'est plus valable ou a été attribuée à un autre étudiant`)
         }
     });
-})
-
-// POST Upload file
-router.post('/missions/:missionId', upload.single('selectedFile'), (req, res) => {
-    res.send()
 })
 
 // Read missions
