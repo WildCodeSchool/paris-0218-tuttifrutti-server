@@ -9,6 +9,10 @@ let missionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  subField: {
+    type: String,
+    required: true
+  },
   deadline: {
     type: Date,
     required: true
