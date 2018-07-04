@@ -101,7 +101,7 @@ router.post('/reg', async(req, res, next) => {
             const user = await AvocatModel.findOne({email: req.body.user.email})
             // await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
             // await AvocatModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3030/confirmation/avocat/${user._id}` // attention backend a changer -Dan
+            let link = await `http://localhost:3030/confirmation/${user._id}` // attention backend a changer -Dan
 
             // setup email data with unicode symbols
             let mailOptions = {
@@ -133,7 +133,7 @@ router.post('/reg', async(req, res, next) => {
 })
 
 // Mail Confirm Get Advocat
-router.get('/confirmation/avocat/:uuid', async(req, res) => {
+router.get('/confirmation/:uuid', async(req, res) => {
 
     console.log(req.params.uuid)
     const query = await {uuid: `${req.params.uuid}`}
@@ -142,7 +142,7 @@ router.get('/confirmation/avocat/:uuid', async(req, res) => {
 })
 
 // Mail Confirm Get Student
-router.get('/confirmation/student/:uuid', async(req, res) => {
+router.get('/confirmation/:uuid', async(req, res) => {
 
     console.log(req.params.uuid)
     const query = await {uuid: `${req.params.uuid}`}
