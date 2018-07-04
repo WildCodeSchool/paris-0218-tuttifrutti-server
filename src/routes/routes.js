@@ -316,9 +316,9 @@ router.post('/missions', function (req, res, next) {
 router.get('/accept/:mission/:uuid', async(req, res) => {
     const queryStudent = await {_id: `${req.params.uuid}`}
     const queryMission = await {_id: `${req.params.mission}`}
-    await MissionModel.find(queryMission, async (err, result) => {
+    await MissionModel.find(queryMission, async(err, result) => {
         if (result[0].student === '') {
-						await MissionModel.findOneAndUpdate(queryMission, {student: queryStudent}),
+            await MissionModel.findOneAndUpdate(queryMission, {student: queryStudent}),
             res.json('mission accepted')
         } else {
             res.json('mission already taken')
