@@ -3,6 +3,7 @@ const router = express.Router()
 const AvocatModel = require('../models/avocat.js')
 const MissionModel = require('../models/mission.js')
 const StudentModel = require('../models/student.js')
+const AdminModel = require('../models/admin.js')
 const bcrypt = require('bcrypt-promise')
 const jwt = require('jsonwebtoken')
 const jwtSecret = 'MAKEITUNUVERSAL'
@@ -67,6 +68,53 @@ router.use(function (err, req, res, next) {
   next(err)
 })
 
+
+// POST Registration Admin
+
+router.post('/signupadmin', async(req, res, next) => {
+
+	const newAdmin = await new AdminModel(req.body.user)
+	newAdmin.password = await bcrypt.hash(newAdmin.password, 16)
+
+	await newAdmin
+			.save()
+			.then(res.json('ok'))
+			.then(async() => {
+					const user = await AdminModel.findOne({email: req.body.user.email})
+					console.log(user._id)
+					// await AdminModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
+					// await AdminModel.findOne({email: req.body.user.email})
+					let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
+					console.log(link)
+					// setup email data with unicode symbols
+					let mailOptions = {
+							from: 'tester@gmail.com', // sender address
+							to: `${req.body.user.email}`, // list of receivers
+							subject: 'Confirmez votre adresse mail', // Subject line
+							text: `Admin,
+
+							Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :
+
+							${link}
+
+							Merci,
+
+							L’équipe de LITTA`
+					};
+
+					// send mail with defined transport object
+					transporter.sendMail(mailOptions, (error, info) => {
+							if (error) {
+									return console.log(error);
+							}
+							console.log('Message sent: %s', info.messageId);
+							// Preview only available when sending through an Ethereal account
+							console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+					})
+			})
+			.catch(next)
+})
+
 // POST Registration Student
 
 router.post('/regstudent', async(req, res, next) => {
@@ -79,7 +127,7 @@ router.post('/regstudent', async(req, res, next) => {
         .then(res.json('ok'))
         .then(async() => {
             const user = await StudentModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3030/confirmation/student/${user._id}`
+            let link = await `http://localhost:3000/confirmation/student/${user._id}`
 
             // setup email data with unicode symbols
             let mailOptions = {
@@ -123,7 +171,7 @@ router.post('/reg', async(req, res, next) => {
             const user = await AvocatModel.findOne({email: req.body.user.email})
             // await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
             // await AvocatModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3030/confirmation/${user._id}` // attention backend a changer -Dan
+            let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
 
             // setup email data with unicode symbols
             let mailOptions = {
@@ -154,6 +202,15 @@ router.post('/reg', async(req, res, next) => {
         .catch(next)
 })
 
+// Mail Confirm Get Admin
+router.get('/confirmation/:uuid', async(req, res) => {
+
+	console.log(req.params.uuid)
+	const query = await {uuid: `${req.params.uuid}`}
+	await AdminModel.findOneAndUpdate(query, {activated: true})
+	res.json('testing')
+})
+
 // Mail Confirm Get Advocat
 router.get('/confirmation/:uuid', async(req, res) => {
 
@@ -170,6 +227,27 @@ router.get('/confirmation/:uuid', async(req, res) => {
     const query = await {uuid: `${req.params.uuid}`}
     await StudentModel.findOneAndUpdate(query, {activated: true})
     res.json('testing')
+})
+
+// POST Login admin
+
+router.post('/loginadmin', async(req, res, next) => {
+	const user = await AdminModel.findOne({email: req.body.creds.email})
+	console.log(user)
+	if (user === null) {
+			return res.json('error')
+	}
+	const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
+	if (isEqual) {
+			const token = jwt.sign({
+					id: user._id,
+					username: user.email
+			}, jwtSecret)
+			res.json({token})
+	} else {
+			res.json('auth failed')
+			return next(Error('Wrong Password'))
+	}
 })
 
 // POST Login Student
@@ -226,6 +304,15 @@ router.get('/secure', (req, res, next) => {
             res.json('logged')
         }
     })
+})
+
+// POST to get info admin
+
+router.post('/infoadmin', async(req, res, next) => {
+	console.log(req.body.decoded.id)
+	const user = await AdminModel.findOne({_id: req.body.decoded.id})
+	console.log(user)
+	res.json(user)
 })
 
 // POST to get info avocat
