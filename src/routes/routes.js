@@ -202,32 +202,32 @@ router.post('/reg', async(req, res, next) => {
         .catch(next)
 })
 
-// Mail Confirm Get Admin
-router.get('/confirmation/:uuid', async(req, res) => {
+// // Mail Confirm Get Admin
+// router.get('/confirmation/:uuid', async(req, res) => {
 
-	console.log(req.params.uuid)
-	const query = await {uuid: `${req.params.uuid}`}
-	await AdminModel.findOneAndUpdate(query, {activated: true})
-	res.json('testing')
-})
+// 	console.log(req.params.uuid)
+// 	const query = await {_id: `${req.params.uuid}`}
+// 	await AdminModel.findOneAndUpdate(query, {activated: true})
+// 	res.json('Votre compte a été confirmé')
+// })
 
 // Mail Confirm Get Advocat
 router.get('/confirmation/:uuid', async(req, res) => {
 
     console.log(req.params.uuid)
-    const query = await {uuid: `${req.params.uuid}`}
+    const query = await {_id: `${req.params.uuid}`}
     await AvocatModel.findOneAndUpdate(query, {activated: true})
-    res.json('testing')
+    res.json('Votre compte a été confirmé')
 })
 
-// Mail Confirm Get Student
-router.get('/confirmation/:uuid', async(req, res) => {
+// // Mail Confirm Get Student
+// router.get('/confirmation/:uuid', async(req, res) => {
 
-    console.log(req.params.uuid)
-    const query = await {uuid: `${req.params.uuid}`}
-    await StudentModel.findOneAndUpdate(query, {activated: true})
-    res.json('testing')
-})
+//     console.log(req.params.uuid)
+//     const query = await {_id: `${req.params.uuid}`}
+//     await StudentModel.findOneAndUpdate(query, {activated: true})
+//     res.json('Votre compte a été confirmé')
+// })
 
 // POST Login admin
 
@@ -479,5 +479,24 @@ router.post('/oldmissionsfiltered', (req, res, next) => {
         .then(missions => res.json(missions.filter(mission => mission.finished === true).filter(mission => mission.author === lawyer)))
         .catch(next)
 })
+
+router.get('/allstudents', (req, res, next) => { 
+    StudentModel
+    .find()
+    .then(users => res.json(users))
+    .catch(next)
+
+
+
+    });
+
+    router.post('/allstudents', async(req, res, next) => {
+
+        console.log(req.body.user.email)
+        const query = await {uuid: `${req.params.uuid}`}
+        await StudentModel.findOneAndUpdate(query, {activated: true})
+        res.json('testing')
+
+    })
 
 module.exports = router
