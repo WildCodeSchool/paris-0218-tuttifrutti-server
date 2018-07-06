@@ -27,7 +27,7 @@ const upload = multer({
   limits: { fileSize: 5 * 10 ** 6 }, // 5mo
   fileFilter: function (req, file, cb) {
     if (!file.originalname.toLowerCase().match(/\.(pdf|jpeg|jpg|doc|docx)$/)) {
-      return cb(Error('Envoi de pdf, doc, docx, jpg ou jpeg seulement'))
+      return cb(Error('.pdf, .doc/docx, .jpg/jpeg uniquement'))
     }
     cb(null, true)
   }
@@ -488,7 +488,7 @@ router.post('/oldmissionsfiltered', (req, res, next) => {
     .catch(next)
 })
 
-router.get('/allstudents', (req, res, next) => { 
+router.get('/allstudents', (req, res, next) => {
     StudentModel
     .find()
     .then(users => res.json(users))
