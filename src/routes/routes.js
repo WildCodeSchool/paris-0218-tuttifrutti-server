@@ -417,7 +417,7 @@ router.post('/missions', function (req, res, next) {
                 </style>
                 <p>Bonjour,</p>
                 <p>Une nouvelle mission est disponible en ${req.body.mission.field}</p>
-                <p>La description de la mission est la suivante:<br />${req.body.mission.description}</p>
+                <p>La description de la mission est la suivante :<br />${req.body.mission.description}</p>
                 <a href="${link}" target="_blank">
                 <button>Accepter la mission</button>
                 </a>
@@ -428,9 +428,8 @@ router.post('/missions', function (req, res, next) {
                   </tr>
                   <tr>
                     <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-                  </tr>
-                </table>
-                `,
+                  </tr> 
+                </table>`,
               attachments: [{
                 filename: 'logo.png',
                 path: __dirname +'/img/logo.png',
