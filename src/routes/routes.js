@@ -10,8 +10,8 @@ const jwtSecret = 'MAKEITUNUVERSAL'
 const nodemailer = require('nodemailer')
 const bodyParser = require('body-parser')
 const multer = require('multer')
-const uuidv4 = require('uuid/v4')
-const path = require('path')
+// const uuidv4 = require('uuid/v4')
+// const path = require('path')
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -68,51 +68,49 @@ router.use(function (err, req, res, next) {
   next(err)
 })
 
-
 // POST Registration Admin
 
-router.post('/signupadmin', async(req, res, next) => {
+router.post('/signupadmin', async (req, res, next) => {
+  const newAdmin = await new AdminModel(req.body.user)
+  newAdmin.password = await bcrypt.hash(newAdmin.password, 16)
 
-	const newAdmin = await new AdminModel(req.body.user)
-	newAdmin.password = await bcrypt.hash(newAdmin.password, 16)
+  await newAdmin
+    .save()
+    .then(res.json('ok'))
+    .then(async () => {
+      const user = await AdminModel.findOne({email: req.body.user.email})
+      console.log(user._id)
+      // await AdminModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
+      // await AdminModel.findOne({email: req.body.user.email})
+      let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
+      console.log(link)
+      // setup email data with unicode symbols
+      let mailOptions = {
+        from: 'tester@gmail.com', // sender address
+        to: `${req.body.user.email}`, // list of receivers
+        subject: 'Confirmez votre adresse mail', // Subject line
+        text: `Admin,
 
-	await newAdmin
-			.save()
-			.then(res.json('ok'))
-			.then(async() => {
-					const user = await AdminModel.findOne({email: req.body.user.email})
-					console.log(user._id)
-					// await AdminModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
-					// await AdminModel.findOne({email: req.body.user.email})
-					let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
-					console.log(link)
-					// setup email data with unicode symbols
-					let mailOptions = {
-							from: 'tester@gmail.com', // sender address
-							to: `${req.body.user.email}`, // list of receivers
-							subject: 'Confirmez votre adresse mail', // Subject line
-							text: `Admin,
+              Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :
 
-							Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :
+              ${link}
 
-							${link}
+              Merci,
 
-							Merci,
+              L’équipe de LITTA`
+      }
 
-							L’équipe de LITTA`
-					};
-
-					// send mail with defined transport object
-					transporter.sendMail(mailOptions, (error, info) => {
-							if (error) {
-									return console.log(error);
-							}
-							console.log('Message sent: %s', info.messageId);
-							// Preview only available when sending through an Ethereal account
-							console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-					})
-			})
-			.catch(next)
+      // send mail with defined transport object
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return console.log(error)
+        }
+        console.log('Message sent: %s', info.messageId)
+        // Preview only available when sending through an Ethereal account
+        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
+      })
+    })
+    .catch(next)
 })
 
 // POST Registration Student
@@ -121,12 +119,12 @@ router.post('/regstudent', async (req, res, next) => {
   const newStudent = await new StudentModel(req.body.user)
   newStudent.password = await bcrypt.hash(newStudent.password, 16)
 
-    await newStudent
-        .save()
-        .then(res.json('ok'))
-        .then(async() => {
-            const user = await StudentModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3000/confirmation/student/${user._id}`
+  await newStudent
+    .save()
+    .then(res.json('ok'))
+    .then(async () => {
+      const user = await StudentModel.findOne({email: req.body.user.email})
+      let link = await `http://localhost:3000/confirmation/student/${user._id}`
 
       // setup email data with unicode symbols
       let mailOptions = {
@@ -158,27 +156,25 @@ router.post('/regstudent', async (req, res, next) => {
 })
 // POST Registration Avocat
 
+router.post('/reg', async (req, res, next) => {
+  const newAvocat = await new AvocatModel(req.body.user)
+  newAvocat.password = await bcrypt.hash(newAvocat.password, 16)
 
-router.post('/reg', async(req, res, next) => {
+  await newAvocat
+    .save()
+    .then(res.json('ok'))
+    .then(async () => {
+      const user = await AvocatModel.findOne({email: req.body.user.email})
+      // await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
+      // await AvocatModel.findOne({email: req.body.user.email})
+      let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
 
-    const newAvocat = await new AvocatModel(req.body.user)
-    newAvocat.password = await bcrypt.hash(newAvocat.password, 16)
-
-    await newAvocat
-        .save()
-        .then(res.json('ok'))
-        .then(async() => {
-            const user = await AvocatModel.findOne({email: req.body.user.email})
-            // await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
-            // await AvocatModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
-
-            // setup email data with unicode symbols
-            let mailOptions = {
-                from: 'tester@gmail.com', // sender address
-                to: `${req.body.user.email}`, // list of receivers
-                subject: 'Confirmez votre adresse mail', // Subject line
-                text: `Maître,
+      // setup email data with unicode symbols
+      let mailOptions = {
+        from: 'tester@gmail.com', // sender address
+        to: `${req.body.user.email}`, // list of receivers
+        subject: 'Confirmez votre adresse mail', // Subject line
+        text: `Maître,
 
                 Afin de validez votre inscription sur LITTA, merci de cliquer sur le lien suivant :
 
@@ -205,20 +201,19 @@ router.post('/reg', async(req, res, next) => {
 // // Mail Confirm Get Admin
 // router.get('/confirmation/:uuid', async(req, res) => {
 
-// 	console.log(req.params.uuid)
-// 	const query = await {_id: `${req.params.uuid}`}
-// 	await AdminModel.findOneAndUpdate(query, {activated: true})
-// 	res.json('Votre compte a été confirmé')
+//  console.log(req.params.uuid)
+//  const query = await {_id: `${req.params.uuid}`}
+//  await AdminModel.findOneAndUpdate(query, {activated: true})
+//  res.json('Votre compte a été confirmé')
 // })
 
 // Mail Confirm Get Advocat
 
-router.get('/confirmation/:uuid', async(req, res) => {
-
-    console.log(req.params.uuid)
-    const query = await {_id: `${req.params.uuid}`}
-    await AvocatModel.findOneAndUpdate(query, {activated: true})
-    res.json('Votre compte a été confirmé')
+router.get('/confirmation/:uuid', async (req, res) => {
+  console.log(req.params.uuid)
+  const query = await {_id: `${req.params.uuid}`}
+  await AvocatModel.findOneAndUpdate(query, {activated: true})
+  res.json('Votre compte a été confirmé')
 })
 
 // // Mail Confirm Get Student
@@ -232,23 +227,23 @@ router.get('/confirmation/:uuid', async(req, res) => {
 
 // POST Login admin
 
-router.post('/loginadmin', async(req, res, next) => {
-	const user = await AdminModel.findOne({email: req.body.creds.email})
-	console.log(user)
-	if (user === null) {
-			return res.json('error')
-	}
-	const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
-	if (isEqual) {
-			const token = jwt.sign({
-					id: user._id,
-					username: user.email
-			}, jwtSecret)
-			res.json({token})
-	} else {
-			res.json('auth failed')
-			return next(Error('Wrong Password'))
-	}
+router.post('/loginadmin', async (req, res, next) => {
+  const user = await AdminModel.findOne({email: req.body.creds.email})
+  console.log(user)
+  if (user === null) {
+    return res.json('error')
+  }
+  const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
+  if (isEqual) {
+    const token = jwt.sign({
+      id: user._id,
+      username: user.email
+    }, jwtSecret)
+    res.json({token})
+  } else {
+    res.json('auth failed')
+    return next(Error('Wrong Password'))
+  }
 })
 
 // POST Login Student
@@ -309,11 +304,11 @@ router.get('/secure', (req, res, next) => {
 
 // POST to get info admin
 
-router.post('/infoadmin', async(req, res, next) => {
-	console.log(req.body.decoded.id)
-	const user = await AdminModel.findOne({_id: req.body.decoded.id})
-	console.log(user)
-	res.json(user)
+router.post('/infoadmin', async (req, res, next) => {
+  console.log(req.body.decoded.id)
+  const user = await AdminModel.findOne({_id: req.body.decoded.id})
+  console.log(user)
+  res.json(user)
 })
 
 // POST to get info avocat
@@ -401,16 +396,34 @@ router.post('/missions', function (req, res, next) {
               subject: 'Proposition de mission', // Subject line
               text: `Bonjour,
 
-								Une nouvelle mission est disponible en ${req.body.mission.field}
-								La description de la mission est la suivante:
-								${req.body.mission.description}
+                Une nouvelle mission est disponible en ${req.body.mission.field}
+                La description de la mission est la suivante:
+                ${req.body.mission.description}
 
 
-								//insérer un bouton//
-								${link}
-								Merci,
+                //insérer un bouton//
+                ${link}
+                Merci,
 
-								L’équipe de LITTA`
+                L’équipe de LITTA`,
+              html: ` <style>
+                button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
+                button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
+                img {height: 80px; width: auto;}
+                </style>
+                <p>Bonjour,</p>
+                <p>Une nouvelle mission est disponible en ${req.body.mission.field}</p>
+                <p>La description de la mission est la suivante:<br />${req.body.mission.description}</p>
+                <a href="${link}">
+                <button>Accepter la mission</button>
+                </a>
+                <p>Merci,<br />L’équipe de LITTA</p>
+                <img src="cid:logo" />`,
+              attachments: [{
+                filename: 'logo.png',
+                path: __dirname +'/img/logo.png',
+                cid: 'logo' // same cid value as in the html img src
+              }]
             }
 
             // send mail with defined transport object
@@ -489,22 +502,17 @@ router.post('/oldmissionsfiltered', (req, res, next) => {
 })
 
 router.get('/allstudents', (req, res, next) => {
-    StudentModel
+  StudentModel
     .find()
     .then(users => res.json(users))
     .catch(next)
+})
 
-
-
-    });
-
-    router.post('/allstudents', async(req, res, next) => {
-
-        console.log(req.body.user.email)
-        const query = await {uuid: `${req.params.uuid}`}
-        await StudentModel.findOneAndUpdate(query, {activated: true})
-        res.json('testing')
-
-    })
+router.post('/allstudents', async (req, res, next) => {
+  console.log(req.body.user.email)
+  const query = await {uuid: `${req.params.uuid}`}
+  await StudentModel.findOneAndUpdate(query, {activated: true})
+  res.json('testing')
+})
 
 module.exports = router
