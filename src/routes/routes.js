@@ -488,24 +488,41 @@ router.post('/oldmissionsfiltered', (req, res, next) => {
     .catch(next)
 })
 
+// GET ALL STUDENTS
+
 router.get('/allstudents', (req, res, next) => {
     StudentModel
     .find()
     .then(users => res.json(users))
     .catch(next)
+	});
 
+// CHANGE STATUS OF A STUDENT
 
+router.post('/allstudents', async(req, res, next) => {
+	// const query = await {uuid: `${req.params.uuid}`}
+	console.log(req.body)
+	const update = req.body.student
+	if (update.approved === true) {
+		await StudentModel.findByIdAndUpdate(update._id,
+			{$set: {approved: false}})
+			.then((student) => res.json(student))
+			.catch(next)
+	} else {
+		await StudentModel.findByIdAndUpdate(update._id, {$set: {approved: true}})
+		.then((student) => res.json(student))
+		.catch(next)
+	}
 
-    });
+})
 
-    router.post('/allstudents', async(req, res, next) => {
-				console.log(req.body)
-        console.log(req.body.user.email)
-				const query = await {uuid: `${req.params.uuid}`}
-        console.log(query)
-        await StudentModel.findOneAndUpdate(query, {activated: true})
-        res.json('testing')
-
-    })
+// router.post('/allstudents', async(req, res, next) => {
+// 		console.log(req.body)
+// 		console.log(req.body.user.email)
+// 		const query = await {uuid: `${req.params.uuid}`}
+// 		console.log(query)
+// 		await StudentModel.findOneAndUpdate(query, {activated: true})
+// 		res.json('testing')
+// })
 
 module.exports = router
