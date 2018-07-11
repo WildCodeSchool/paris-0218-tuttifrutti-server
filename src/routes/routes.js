@@ -97,7 +97,35 @@ router.post('/signupadmin', async (req, res, next) => {
 
               Merci,
 
-              L’équipe de LITTA`
+              L’équipe de LITTA`,
+        html: `<style>
+            a {text-decoration: none; color: #7accbc;}
+            a:hover {color: #1fa792;}
+            button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
+            button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
+            img {height: 70px; width: auto;}
+            table {border: none; font-size: 12px; color: #7accbc;}
+            span {font-weight: bold; color: #1fa792;}
+          </style>
+          <p>Admin,</p>
+          <p>Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :</p>
+          <a href="${link}" target="_blank">
+            <button>Valider l'inscription</button>
+          </a>
+          <p>Merci,<br />L’équipe de LITTA</p>
+          <table>
+            <tr>
+              <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
+            </tr>
+            <tr>
+              <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
+            </tr> 
+          </table>`,
+        attachments: [{
+          filename: 'logo.png',
+          path: __dirname + '/img/logo.png',
+          cid: 'logo' // same cid value as in the html img src
+        }]
       }
 
       // send mail with defined transport object
