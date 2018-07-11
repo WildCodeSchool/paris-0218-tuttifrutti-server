@@ -499,9 +499,10 @@ router.get('/allstudents', (req, res, next) => {
     });
 
     router.post('/allstudents', async(req, res, next) => {
-
+				console.log(req.body)
         console.log(req.body.user.email)
-        const query = await {uuid: `${req.params.uuid}`}
+				const query = await {uuid: `${req.params.uuid}`}
+        console.log(query)
         await StudentModel.findOneAndUpdate(query, {activated: true})
         res.json('testing')
 
