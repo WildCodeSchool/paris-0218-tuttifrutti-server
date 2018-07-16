@@ -218,17 +218,17 @@ router.get('/confirmation/:uuid', async(req, res) => {
     console.log(req.params.uuid)
     const query = await {_id: `${req.params.uuid}`}
     await AvocatModel.findOneAndUpdate(query, {activated: true})
-    res.json('Votre compte a été confirmé')
+    res.json('Votre e-mail a bien été vérifié. Connectez vous dès maintenant.')
 })
 
 // // Mail Confirm Get Student
-// router.get('/confirmation/:uuid', async(req, res) => {
+router.get('/confirmationstudent/:uuid', async(req, res) => {
 
-//     console.log(req.params.uuid)
-//     const query = await {_id: `${req.params.uuid}`}
-//     await StudentModel.findOneAndUpdate(query, {activated: true})
-//     res.json('Votre compte a été confirmé')
-// })
+    console.log(req.params.uuid)
+    const query = await {_id: `${req.params.uuid}`}
+    await StudentModel.findOneAndUpdate(query, {activated: true})
+    res.json('Votre e-mail a bien été vérifié. Connectez-vous dès maintenant.')
+})
 
 // POST Login admin
 
@@ -500,20 +500,12 @@ router.get('/allstudents', (req, res, next) => {
 // CHANGE STATUS OF A STUDENT
 
 router.post('/allstudents', async(req, res, next) => {
-	// const query = await {uuid: `${req.params.uuid}`}
 	console.log(req.body)
-	const update = req.body.student
-	if (update.approved === true) {
-		await StudentModel.findByIdAndUpdate(update._id,
-			{$set: {approved: false}})
-			.then((student) => res.json(student))
+	const update = req.body.user
+	await StudentModel.findByIdAndUpdate(update._id,
+			{$set: update})
+			.then((user) => res.json(user))
 			.catch(next)
-	} else {
-		await StudentModel.findByIdAndUpdate(update._id, {$set: {approved: true}})
-		.then((student) => res.json(student))
-		.catch(next)
-	}
-
 })
 
 // router.post('/allstudents', async(req, res, next) => {
@@ -522,7 +514,7 @@ router.post('/allstudents', async(req, res, next) => {
 // 		const query = await {uuid: `${req.params.uuid}`}
 // 		console.log(query)
 // 		await StudentModel.findOneAndUpdate(query, {activated: true})
-// 		res.json('testing')
+// 		res.json('testing');
 // })
 
 module.exports = router
