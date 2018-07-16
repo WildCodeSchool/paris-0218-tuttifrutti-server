@@ -222,13 +222,13 @@ router.get('/confirmation/:uuid', async(req, res) => {
 })
 
 // // Mail Confirm Get Student
-router.get('/confirmationstudent/:uuid', async(req, res) => {
+// router.get('/confirmationstudent/:uuid', async(req, res) => {
 
-    console.log(req.params.uuid)
-    const query = await {_id: `${req.params.uuid}`}
-    await StudentModel.findOneAndUpdate(query, {activated: true})
-    res.json('Votre e-mail a bien été vérifié. Connectez-vous dès maintenant.')
-})
+//     console.log(req.params.uuid)
+//     const query = await {_id: `${req.params.uuid}`}
+//     await StudentModel.findOneAndUpdate(query, {activated: true})
+//     res.json('Votre e-mail a bien été vérifié. Connectez-vous dès maintenant.')
+// })
 
 // POST Login admin
 
@@ -487,6 +487,17 @@ router.post('/oldmissionsfiltered', (req, res, next) => {
     .then(missions => res.json(missions.filter(mission => mission.finished === true).filter(mission => mission.author === lawyer)))
     .catch(next)
 })
+
+
+// GET ALL LAWYERS
+
+router.get('/alllawyers', (req, res, next) => {
+	AvocatModel
+	.find()
+	.then(users => res.json(users))
+	.catch(next)
+});
+
 
 // GET ALL STUDENTS
 
