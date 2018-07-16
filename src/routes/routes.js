@@ -273,12 +273,10 @@ router.post('/login', async (req, res, next) => {
   const user = await AvocatModel.findOne({email: req.body.creds.email})
   console.log(user)
   if (user === null) {
-    return res.json('error')
+    return res.json('auth failed')
 	}
 	if (user.activated === false) {
-		console.log("non activé")
-		res.json('Email non vérifié')
-		return next(Error('Email non vérifié'))
+		return res.json('not verified')
 	} else {
 		const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
 		if (isEqual) {
@@ -286,10 +284,9 @@ router.post('/login', async (req, res, next) => {
 				id: user._id,
 				username: user.email
 			}, jwtSecret)
-			res.json({token})
+			return res.json({token})
 		} else {
-			res.json('auth failed')
-			return next(Error('Wrong Password'))
+			return res.json('auth failed')
 		}
 	}
 })
