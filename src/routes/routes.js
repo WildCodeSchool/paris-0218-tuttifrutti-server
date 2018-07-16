@@ -316,6 +316,36 @@ router.post('/infoadmin', async(req, res, next) => {
 	res.json(user)
 })
 
+// EDIT ADMIN INFO
+router.put('/infoadmin', async (req, res, next) => {
+  const update = req.body.user
+  console.log(update)
+
+  if (update.password && update.password !== '') {
+    console.log('password modifié', update)
+    update.password = await bcrypt.hash(update.password, 16)
+    console.log('password modifié apres crypt', update)
+
+    AdminModel.findByIdAndUpdate({
+      _id: update.id
+    }, {$set: update}).then((admin) => res.json(admin)).catch(next)
+  } else {
+    console.log('password pas modifié', update)
+    AdminModel.findByIdAndUpdate({
+      _id: update.id
+    }, {
+      $set: {
+        email: update.email,
+        firstName: update.firstName,
+        lastName: update.lastName
+      }
+    })
+      .then(admin => console.log(admin))
+      .then(admin => res.json(admin))
+      .catch(next)
+  }
+})
+
 // POST to get info avocat
 
 router.post('/infolawyer', async (req, res, next) => {
