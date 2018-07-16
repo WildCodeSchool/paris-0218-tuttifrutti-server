@@ -84,7 +84,7 @@ router.post('/signupadmin', async(req, res, next) => {
 					console.log(user._id)
 					// await AdminModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
 					// await AdminModel.findOne({email: req.body.user.email})
-					let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
+					let link = await `http://localhost:3000/confirmationadmin/${user._id}` // attention backend a changer -Dan
 					console.log(link)
 					// setup email data with unicode symbols
 					let mailOptions = {
@@ -126,7 +126,7 @@ router.post('/regstudent', async (req, res, next) => {
         .then(res.json('ok'))
         .then(async() => {
             const user = await StudentModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3000/confirmation/student/${user._id}`
+            let link = await `http://localhost:3000/confirmationstudent/${user._id}`
 
       // setup email data with unicode symbols
       let mailOptions = {
@@ -171,7 +171,7 @@ router.post('/reg', async(req, res, next) => {
             const user = await AvocatModel.findOne({email: req.body.user.email})
             // await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
             // await AvocatModel.findOne({email: req.body.user.email})
-            let link = await `http://localhost:3000/confirmation/${user._id}` // attention backend a changer -Dan
+            let link = await `http://localhost:3000/confirmationlawyer/${user._id}` // attention backend a changer -Dan
 
             // setup email data with unicode symbols
             let mailOptions = {
@@ -202,18 +202,18 @@ router.post('/reg', async(req, res, next) => {
     .catch(next)
 })
 
-// // Mail Confirm Get Admin
-// router.get('/confirmation/:uuid', async(req, res) => {
+// Mail Confirm Get Admin
+router.get('/confirmationadmin/:uuid', async(req, res) => {
 
-// 	console.log(req.params.uuid)
-// 	const query = await {_id: `${req.params.uuid}`}
-// 	await AdminModel.findOneAndUpdate(query, {activated: true})
-// 	res.json('Votre compte a été confirmé')
-// })
+	console.log(req.params.uuid)
+	const query = await {_id: `${req.params.uuid}`}
+	await AdminModel.findOneAndUpdate(query, {activated: true})
+	res.json('Votre e-mail a bien été vérifié. Connectez vous dès maintenant.')
+})
 
 // Mail Confirm Get Advocat
 
-router.get('/confirmation/:uuid', async(req, res) => {
+router.get('/confirmationlawyer/:uuid', async(req, res) => {
 
     console.log(req.params.uuid)
     const query = await {_id: `${req.params.uuid}`}
@@ -221,14 +221,14 @@ router.get('/confirmation/:uuid', async(req, res) => {
     res.json('Votre e-mail a bien été vérifié. Connectez vous dès maintenant.')
 })
 
-// // Mail Confirm Get Student
-// router.get('/confirmationstudent/:uuid', async(req, res) => {
+// Mail Confirm Get Student
+router.get('/confirmationstudent/:uuid', async(req, res) => {
 
-//     console.log(req.params.uuid)
-//     const query = await {_id: `${req.params.uuid}`}
-//     await StudentModel.findOneAndUpdate(query, {activated: true})
-//     res.json('Votre e-mail a bien été vérifié. Connectez-vous dès maintenant.')
-// })
+    console.log(req.params.uuid)
+    const query = await {_id: `${req.params.uuid}`}
+    await StudentModel.findOneAndUpdate(query, {activated: true})
+    res.json('Votre e-mail a bien été vérifié. Connectez-vous dès maintenant.')
+})
 
 // POST Login admin
 
@@ -274,18 +274,24 @@ router.post('/login', async (req, res, next) => {
   console.log(user)
   if (user === null) {
     return res.json('error')
-  }
-  const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
-  if (isEqual) {
-    const token = jwt.sign({
-      id: user._id,
-      username: user.email
-    }, jwtSecret)
-    res.json({token})
-  } else {
-    res.json('auth failed')
-    return next(Error('Wrong Password'))
-  }
+	}
+	if (user.activated === false) {
+		console.log("non activé")
+		res.json('Email non vérifié')
+		return next(Error('Email non vérifié'))
+	} else {
+		const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
+		if (isEqual) {
+			const token = jwt.sign({
+				id: user._id,
+				username: user.email
+			}, jwtSecret)
+			res.json({token})
+		} else {
+			res.json('auth failed')
+			return next(Error('Wrong Password'))
+		}
+	}
 })
 
 // Route to Auth?
