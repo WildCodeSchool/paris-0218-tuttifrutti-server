@@ -232,40 +232,51 @@ router.get('/confirmationstudent/:uuid', async(req, res) => {
 
 // POST Login admin
 
-router.post('/loginadmin', async(req, res, next) => {
-	const user = await AdminModel.findOne({email: req.body.creds.email})
-	console.log(user)
-	if (user === null) {
-			return res.json('error')
+router.post('/loginadmin', async (req, res) => {
+  const user = await AdminModel.findOne({email: req.body.creds.email})
+  console.log(user)
+  if (user === null) {
+    return res.json('auth failed')
 	}
-	const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
-	if (isEqual) {
-			const token = jwt.sign({
-					id: user._id,
-					username: user.email
-			}, jwtSecret)
-			res.json({token})
+	if (user.activated === false) {
+		return res.json('not verified')
 	} else {
-			res.json('auth failed')
-			return next(Error('Wrong Password'))
+		const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
+		if (isEqual) {
+			const token = jwt.sign({
+				id: user._id,
+				username: user.email
+			}, jwtSecret)
+			return res.json({token})
+		} else {
+			return res.json('auth failed')
+		}
 	}
 })
 
-// POST Login Student
+// POST Login Student / A VENIR
 
-router.post('/loginStudent', async (req, res, next) => {
-  const user = await StudentModel.findOne({email: req.body.creds.email})
-  const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
-  if (isEqual === true) {
-    const token = jwt.sign({
-      id: user._id,
-      username: user.email
-    }, jwtSecret)
-    res.json({token})
-  } else {
-    return next(Error('error'))
-  }
-})
+// router.post('/loginstudent', async (req, res, next) => {
+//   const user = await StudentModel.findOne({email: req.body.creds.email})
+//   console.log(user)
+//   if (user === null) {
+//     return res.json('auth failed')
+// 	}
+// 	if (user.activated === false) {
+// 		return res.json('not verified')
+// 	} else {
+// 		const isEqual = await bcrypt.compare(req.body.creds.password, user.password)
+// 		if (isEqual) {
+// 			const token = jwt.sign({
+// 				id: user._id,
+// 				username: user.email
+// 			}, jwtSecret)
+// 			return res.json({token})
+// 		} else {
+// 			return res.json('auth failed')
+// 		}
+// 	}
+// })
 
 // POST Login avocat
 
