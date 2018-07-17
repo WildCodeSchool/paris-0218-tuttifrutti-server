@@ -10,8 +10,8 @@ const jwtSecret = 'MAKEITUNUVERSAL'
 const nodemailer = require('nodemailer')
 const bodyParser = require('body-parser')
 const multer = require('multer')
-const uuidv4 = require('uuid/v4')
-const path = require('path')
+// const uuidv4 = require('uuid/v4')
+// const path = require('path')
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -68,7 +68,6 @@ router.use(function (err, req, res, next) {
   next(err)
 })
 
-
 // POST Registration Admin
 
 router.post('/signupadmin', async(req, res, next) => {
@@ -87,20 +86,48 @@ router.post('/signupadmin', async(req, res, next) => {
 					let link = await `http://localhost:3000/confirmationadmin/${user._id}` // attention backend a changer -Dan
 					console.log(link)
 					// setup email data with unicode symbols
-					let mailOptions = {
-							from: 'tester@gmail.com', // sender address
-							to: `${req.body.user.email}`, // list of receivers
-							subject: 'Confirmez votre adresse mail', // Subject line
-							text: `Admin,
+         let mailOptions = {
+                from: 'tester@gmail.com', // sender address
+                to: `${req.body.user.email}`, // list of receivers
+                subject: 'Confirmez votre adresse mail', // Subject line
+                text: `Admin,
 
-							Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :
+                      Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :
 
-							${link}
+                      ${link}
 
-							Merci,
+                      Merci,
 
-							L’équipe de LITTA`
-					};
+                      L’équipe de LITTA`,
+                html: `<style>
+                    a {text-decoration: none; color: #7accbc;}
+                    a:hover {color: #1fa792;}
+                    button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
+                    button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
+                    img {height: 70px; width: auto;}
+                    table {border: none; font-size: 12px; color: #7accbc;}
+                    span {font-weight: bold; color: #1fa792;}
+                  </style>
+                  <p>Admin,</p>
+                  <p>Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :</p>
+                  <a href="${link}" target="_blank">
+                    <button>Valider l'inscription</button>
+                  </a>
+                  <p>Merci,<br />L’équipe de LITTA</p>
+                  <table>
+                    <tr>
+                      <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
+                    </tr>
+                    <tr>
+                      <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
+                    </tr> 
+                  </table>`,
+                attachments: [{
+                  filename: 'logo.png',
+                  path: __dirname + '/img/logo.png',
+                  cid: 'logo' // same cid value as in the html img src
+                }]
+              }
 
 					// send mail with defined transport object
 					transporter.sendMail(mailOptions, (error, info) => {
@@ -121,12 +148,14 @@ router.post('/regstudent', async (req, res, next) => {
   const newStudent = await new StudentModel(req.body.user)
   newStudent.password = await bcrypt.hash(newStudent.password, 16)
 
+
     await newStudent
         .save()
         .then(res.json('ok'))
         .then(async() => {
             const user = await StudentModel.findOne({email: req.body.user.email})
             let link = await `http://localhost:3000/confirmationstudent/${user._id}`
+
 
       // setup email data with unicode symbols
       let mailOptions = {
@@ -141,7 +170,35 @@ router.post('/regstudent', async (req, res, next) => {
 
                 Merci,
 
-                L’équipe de LITTA`
+                L’équipe de LITTA`,
+        html: `<style>
+            a {text-decoration: none; color: #7accbc;}
+            a:hover {color: #1fa792;}
+            button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
+            button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
+            img {height: 70px; width: auto;}
+            table {border: none; font-size: 12px; color: #7accbc;}
+            span {font-weight: bold; color: #1fa792;}
+          </style>
+          <p><Cheres Etudiant,/p>
+          <p>Afin de validez votre inscription sur LITTA en attendant la validation d'un administrateur, merci de cliquer sur le lien suivant :</p>
+          <a href="${link}" target="_blank">
+            <button>Valider l'inscription</button>
+          </a>
+          <p>Merci,<br />L’équipe de LITTA</p>
+          <table>
+            <tr>
+              <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
+            </tr>
+            <tr>
+              <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
+            </tr> 
+          </table>`,
+        attachments: [{
+          filename: 'logo.png',
+          path: __dirname + '/img/logo.png',
+          cid: 'logo' // same cid value as in the html img src
+        }]
       }
 
       // send mail with defined transport object
@@ -173,12 +230,12 @@ router.post('/reg', async(req, res, next) => {
             // await AvocatModel.findOne({email: req.body.user.email})
             let link = await `http://localhost:3000/confirmationlawyer/${user._id}` // attention backend a changer -Dan
 
-            // setup email data with unicode symbols
-            let mailOptions = {
-                from: 'tester@gmail.com', // sender address
-                to: `${req.body.user.email}`, // list of receivers
-                subject: 'Confirmez votre adresse mail', // Subject line
-                text: `Maître,
+      // setup email data with unicode symbols
+      let mailOptions = {
+        from: 'tester@gmail.com', // sender address
+        to: `${req.body.user.email}`, // list of receivers
+        subject: 'Confirmez votre adresse mail', // Subject line
+        text: `Maître,
 
                 Afin de validez votre inscription sur LITTA, merci de cliquer sur le lien suivant :
 
@@ -186,7 +243,35 @@ router.post('/reg', async(req, res, next) => {
 
                 Merci,
 
-                L’équipe de LITTA`
+                L’équipe de LITTA`,
+        html: `<style>
+            a {text-decoration: none; color: #7accbc;}
+            a:hover {color: #1fa792;}
+            button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
+            button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
+            img {height: 70px; width: auto;}
+            table {border: none; font-size: 12px; color: #7accbc;}
+             span {font-weight: bold; color: #1fa792;}
+          </style>
+          <p>Maître,</p>
+          <p>Afin de validez votre inscription sur LITTA, merci de cliquer sur le lien suivant :</p>
+          <a href="${link}" target="_blank">
+            <button>Valider l'inscription</button>
+          </a>
+          <p>Merci,<br />L’équipe de LITTA</p>
+          <table>
+            <tr>
+              <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
+            </tr>
+            <tr>
+              <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
+            </tr> 
+          </table>`,
+        attachments: [{
+          filename: 'logo.png',
+          path: __dirname + '/img/logo.png',
+          cid: 'logo' // same cid value as in the html img src
+        }]
       }
 
       // send mail with defined transport object
@@ -231,7 +316,7 @@ router.get('/confirmationstudent/:uuid', async(req, res) => {
 })
 
 // POST Login admin
-
+  
 router.post('/loginadmin', async (req, res) => {
   const user = await AdminModel.findOne({email: req.body.creds.email})
   console.log(user)
@@ -323,11 +408,11 @@ router.get('/secure', (req, res, next) => {
 
 // POST to get info admin
 
-router.post('/infoadmin', async(req, res, next) => {
-	console.log(req.body.decoded.id)
-	const user = await AdminModel.findOne({_id: req.body.decoded.id})
-	console.log(user)
-	res.json(user)
+router.post('/infoadmin', async (req, res, next) => {
+  console.log(req.body.decoded.id)
+  const user = await AdminModel.findOne({_id: req.body.decoded.id})
+  console.log(user)
+  res.json(user)
 })
 
 // EDIT ADMIN INFO
@@ -445,16 +530,45 @@ router.post('/missions', function (req, res, next) {
               subject: 'Proposition de mission', // Subject line
               text: `Bonjour,
 
-								Une nouvelle mission est disponible en ${req.body.mission.field}
-								La description de la mission est la suivante:
-								${req.body.mission.description}
+                Une nouvelle mission est disponible en ${req.body.mission.field}
+                La description de la mission est la suivante:
+                ${req.body.mission.description}
 
 
-								//insérer un bouton//
-								${link}
-								Merci,
+                //insérer un bouton//
+                ${link}
+                Merci,
 
-								L’équipe de LITTA`
+                L’équipe de LITTA`,
+              html: ` <style>
+                a {text-decoration: none; color: #7accbc;}
+                a:hover {color: #1fa792;}
+                button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
+                button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
+                img {height: 70px; width: auto;}
+                table {border: none; font-size: 12px; color: #7accbc;}
+                span {font-weight: bold; color: #1fa792;}
+                </style>
+                <p>Bonjour,</p>
+                <p>Une nouvelle mission est disponible en ${req.body.mission.field}</p>
+                <p>La description de la mission est la suivante :<br />${req.body.mission.description}</p>
+                <a href="${link}" target="_blank">
+                  <button>Accepter la mission</button>
+                </a>
+                <p>Merci,<br />L’équipe de LITTA</p>
+                <table>
+                  <tr>
+                    <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
+                  </tr>
+                  <tr>
+                    <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
+                  </tr> 
+                </table>`,
+              attachments: [{
+                filename: 'logo.png',
+                path: __dirname +'/img/logo.png',
+                cid: 'logo' // same cid value as in the html img src
+              }]
             }
 
             // send mail with defined transport object
@@ -546,11 +660,11 @@ router.get('/alllawyers', (req, res, next) => {
 // GET ALL STUDENTS
 
 router.get('/allstudents', (req, res, next) => {
-    StudentModel
+  StudentModel
     .find()
     .then(users => res.json(users))
     .catch(next)
-	});
+	})
 
 // CHANGE STATUS OF A STUDENT
 
