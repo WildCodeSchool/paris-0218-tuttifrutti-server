@@ -120,7 +120,7 @@ router.post('/signupadmin', async(req, res, next) => {
                     </tr>
                     <tr>
                       <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-                    </tr> 
+                    </tr>
                   </table>`,
                 attachments: [{
                   filename: 'logo.png',
@@ -192,7 +192,7 @@ router.post('/regstudent', async (req, res, next) => {
             </tr>
             <tr>
               <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-            </tr> 
+            </tr>
           </table>`,
         attachments: [{
           filename: 'logo.png',
@@ -265,7 +265,7 @@ router.post('/reg', async(req, res, next) => {
             </tr>
             <tr>
               <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-            </tr> 
+            </tr>
           </table>`,
         attachments: [{
           filename: 'logo.png',
@@ -289,11 +289,10 @@ router.post('/reg', async(req, res, next) => {
 
 // Mail Confirm Get Admin
 router.get('/confirmationadmin/:uuid', async(req, res) => {
-
-	console.log(req.params.uuid)
 	const query = await {_id: `${req.params.uuid}`}
 	await AdminModel.findOneAndUpdate(query, {activated: true})
-	res.json('Votre e-mail a bien été vérifié. Connectez vous dès maintenant.')
+	.catch(err => {if(err) res.json('invalid user')})
+	res.json('verified')
 })
 
 // Mail Confirm Get Advocat
@@ -303,7 +302,8 @@ router.get('/confirmationlawyer/:uuid', async(req, res) => {
     console.log(req.params.uuid)
     const query = await {_id: `${req.params.uuid}`}
     await AvocatModel.findOneAndUpdate(query, {activated: true})
-    res.json('Votre e-mail a bien été vérifié. Connectez vous dès maintenant.')
+    .catch(err => {if(err) res.json('invalid user')})
+		res.json('verified')
 })
 
 // Mail Confirm Get Student
@@ -312,11 +312,13 @@ router.get('/confirmationstudent/:uuid', async(req, res) => {
     console.log(req.params.uuid)
     const query = await {_id: `${req.params.uuid}`}
     await StudentModel.findOneAndUpdate(query, {activated: true})
-    res.json('Votre e-mail a bien été vérifié. Connectez-vous dès maintenant.')
+		.catch(err => {if(err) res.json('invalid user')})
+		res.json('verified')
+
 })
 
 // POST Login admin
-  
+
 router.post('/loginadmin', async (req, res) => {
   const user = await AdminModel.findOne({email: req.body.creds.email})
   console.log(user)
@@ -562,7 +564,7 @@ router.post('/missions', function (req, res, next) {
                   </tr>
                   <tr>
                     <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-                  </tr> 
+                  </tr>
                 </table>`,
               attachments: [{
                 filename: 'logo.png',
