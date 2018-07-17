@@ -307,6 +307,7 @@ router.get('/confirmationlawyer/:uuid', async(req, res) => {
 })
 
 // Mail Confirm Get Student
+
 router.get('/confirmationstudent/:uuid', async(req, res) => {
 
     console.log(req.params.uuid)
