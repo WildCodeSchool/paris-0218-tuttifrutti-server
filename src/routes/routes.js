@@ -596,10 +596,10 @@ router.get('/accept/:mission/:uuid', async (req, res) => {
   const queryMission = await {_id: `${req.params.mission}`}
   await MissionModel.find(queryMission, async (err, result) => {
     if (result[0].student === '') {
-      await MissionModel.findOneAndUpdate(queryMission, {student: queryStudent}),
-      res.send('La mission vous a été attribuée')
+      await MissionModel.findOneAndUpdate(queryMission, {student: queryStudent})
+      res.send('Ok')
     } else {
-      res.send(`La mission n'est plus valable ou a été attribuée à un autre étudiant`)
+      res.send('Not avalaible')
     }
   })
 })
