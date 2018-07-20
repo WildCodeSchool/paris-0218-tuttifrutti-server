@@ -53,7 +53,7 @@ router.use(bodyParser.urlencoded({ extended: true }))
 
 // Upload  de fichier
 router.post('/upload', upload.single('selectedFile'), (req, res) => {
-	console.dir(res, { depth: 0 })
+	// console.dir(res, { depth: 0 })
 	res.send({ result: 'ok' })
 })
 
@@ -496,7 +496,6 @@ router.put('/infolawyer', async (req, res, next) => {
 
 // POST to get student info
 router.post('/infostudent', async (req, res, next) => {
-	console.log('---------dsqdqsdqsdqsqsdqs---------', req.body)
 	await StudentModel.findOne({ _id: req.body.studentId })
 		.then(student => res.json(student.firstName))
 		.catch(next)
@@ -624,12 +623,13 @@ router.get('/missions/:missionId', (req, res, next) => {
 // EDIT ONE MISSION WITH FILES SENDED NAMES
 router.put('/missions/:missionId', (req, res, next) => {
 
-  const name = req.body.fileName 
+  const name = req.body.fileName
 
   MissionModel
     .findByIdAndUpdate(req.params.missionId, {$push: {filesSended: name}})
     .then((names) => res.json(names))
     .catch(next)
+})
 
 // SEND MESSAGE TO STUDENT
 router.post('/missions/:missionId/sendmessage', async (req, res, next) => {
