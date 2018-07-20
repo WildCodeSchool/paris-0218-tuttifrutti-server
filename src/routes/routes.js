@@ -623,11 +623,11 @@ router.get('/missions/:missionId', (req, res, next) => {
 
 // EDIT ONE MISSION
 router.put('/missions/:missionId', (req, res, next) => {
-  const update = req.body
+  const name = req.body.fileName 
 
   MissionModel
-    .findByIdAndUpdate(req.params.missionId, {$set: update})
-    .then((mission) => res.json(mission))
+    .findByIdAndUpdate(req.params.missionId, {$push: {filesSended: name}})
+    .then((names) => res.json(names))
     .catch(next)
 })
 

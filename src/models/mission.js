@@ -34,7 +34,7 @@ let missionSchema = new mongoose.Schema({
   finished: {
     type: Boolean
   },
-  filesuploaded: {
+  filesSended: {
     type: Array
   } 
 })
