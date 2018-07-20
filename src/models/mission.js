@@ -33,7 +33,10 @@ let missionSchema = new mongoose.Schema({
   },
   finished: {
     type: Boolean
-  }
+  },
+  filesSended: {
+    type: Array
+  } 
 })
 
 module.exports = mongoose.model('Mission', missionSchema)

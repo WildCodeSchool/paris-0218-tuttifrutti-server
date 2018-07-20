@@ -623,13 +623,13 @@ router.get('/missions/:missionId', (req, res, next) => {
 
 // EDIT ONE MISSION WITH FILES SENDED NAMES
 router.put('/missions/:missionId', (req, res, next) => {
-	const update = req.body
 
-	MissionModel
-		.findByIdAndUpdate(req.params.missionId, { $set: update })
-		.then((mission) => res.json(mission))
-		.catch(next)
-})
+  const name = req.body.fileName 
+
+  MissionModel
+    .findByIdAndUpdate(req.params.missionId, {$push: {filesSended: name}})
+    .then((names) => res.json(names))
+    .catch(next)
 
 // SEND MESSAGE TO STUDENT
 router.post('/missions/:missionId/sendmessage', async (req, res, next) => {
