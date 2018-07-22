@@ -643,7 +643,7 @@ router.post('/missions/:missionId/sendmessage', async (req, res, next) => {
 				subject: `Mission n°${missionId} / Message pour l'étudiant`, // Subject line
 				text: `Admin,
 
-								Pour la mission n°${missionId}, le cabinet ${messageContent.author}souhaite envoyer le message ci-dessous à :
+								Pour la mission n°${missionId}, le cabinet ${messageContent.author} souhaite envoyer le message ci-dessous à :
 								${student.firstName} ${student.lastName}
 								${student.email}
 
@@ -722,6 +722,79 @@ router.post('/oldmissionsfiltered', (req, res, next) => {
 	MissionModel
 		.find()
 		.then(missions => res.json(missions.filter(mission => mission.finished === true).filter(mission => mission.author === lawyer)))
+		.catch(next)
+})
+
+// REPORT PROBLEM TO ADMIN
+router.post('/missions/:missionId/reportproblem', async (req, res, next) => {
+	const messageContent = req.body.messageContent
+	const missionId = messageContent.missionId.slice(-5)
+	await StudentModel.findOne({ _id: req.body.messageContent.studentId })
+		.then(student => {
+			let mailOptions = {
+				from: 'tester@gmail.com', // sender address
+				to: 'admin@litta.fr', // list of receivers
+				subject: `Mission n°${missionId} / Report de problème`, // Subject line
+				text: `Admin,
+
+								Pour la mission n°${missionId}, le cabinet ${messageContent.author} souhaite reporter un problème rencontré durant sa collaboration avec :
+								${student.firstName} ${student.lastName}
+
+								Nature du problème :
+								${messageContent.problem}
+
+								Description :
+								${messageContent.description}
+								`,
+				html: `<style>
+						a {text-decoration: none; color: #7accbc;}
+						a:hover {color: #1fa792;}
+						button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
+						button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
+						img {height: 70px; width: auto;}
+						table {border: none; font-size: 12px; color: #7accbc;}
+						span {font-weight: bold; color: #1fa792;}
+					</style>
+					<p>Admin,</p>
+					<p>Pour la mission n°${missionId}, le cabinet ${messageContent.author} souhaite reporter un problème rencontré durant sa collaboration avec :
+					<br>
+					<br/>
+					${student.firstName} ${student.lastName}
+					<br/>
+					<br/>
+					Nature du problème :
+					<br/>${messageContent.problem}
+					<br/>
+					<br />
+					Description :
+					<br />
+					${messageContent.description}</p>
+					<table>
+						<tr>
+							<td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
+						</tr>
+						<tr>
+							<td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
+						</tr>
+					</table>`,
+				attachments: [{
+					filename: 'logo.png',
+					path: __dirname + '/img/logo.png',
+					cid: 'logo' // same cid value as in the html img src
+				}]
+			}
+
+			// send mail with defined transport object
+			transporter.sendMail(mailOptions, (error, info) => {
+				if (error) {
+					return console.log(error)
+				}
+				console.log('Message sent: %s', info.messageId)
+				// Preview only available when sending through an Ethereal account
+				console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
+			})
+		})
+		.then(res.json("ok"))
 		.catch(next)
 })
 
