@@ -1,3 +1,14 @@
+const nodemailer = require('nodemailer')
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.ethereal.email',
+  port: 587,
+  auth: {
+    user: 'vbkawgch3kkkhqax@ethereal.email',
+    pass: 'bVWMcjVnQenkaJsGz4'
+  }
+})
+
 const studentPropositionMail = (mission, link) => ({
   subject: 'Proposition de mission',
   text: `
