@@ -64,11 +64,11 @@ const STUDENT_MISSION_WITH_LINK_PROPOSAL = (mission, link) => ({
 })
 
 const ADMIN_CONFIRMATION_NEW_MISSION = (mission) => ({
-  subject: `Mission n°${mission._id.slice(-5)} / Nouvelle mission déposée`,
+  subject: `Mission n°${String(mission._id).slice(-5)} / Nouvelle mission déposée`,
   text: `
     Admin,
 
-    Numéro de mission unique : ${mission._id.slice(-5)}
+    Numéro de mission unique : ${String(mission._id).slice(-5)}
     Echéance : ${new Date(mission.deadline).toLocaleString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
     Nom du cabinet : ${mission.name}
     Nom de l’avocat : ${mission.author}
@@ -78,11 +78,11 @@ const ADMIN_CONFIRMATION_NEW_MISSION = (mission) => ({
   `,
   html: htmlLayout(`
     <p>Admin,</p>
-    <p>Numéro de mission unique : ${mission._id.slice(-5)}
+    <p>Numéro de mission unique : ${String(mission._id).slice(-5)}
     <br/>
     Echéance : ${new Date(mission.deadline).toLocaleString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
     <br/>
-    Nom du cabinet : ${mission.cabinet}
+    Nom du cabinet : ${mission.name}
     <br/>
     Nom de l’avocat : ${mission.author}
     <br/>
