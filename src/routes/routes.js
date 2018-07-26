@@ -15,6 +15,7 @@ const mail = require('./mail')
 
 const hostUrl = process.env.HOST_URL || 'http://localhost:3000'
 const jwtSecret = process.env.JWT_SECRET || 'MAKEITUNUVERSAL'
+const LITTA_ADMIN_EMAIL = process.env.LITTA_ADMIN_EMAIL || 'admin@litta.fr'
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -37,18 +38,6 @@ const upload = multer({
 
 })
 
-// const path = require('path') Generate test SMTP service account from
-// ethereal.email Only needed if you don't have a real mail account for testing
-// create reusable transporter object using the default SMTP transport
-const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
-  port: 587,
-  auth: {
-    user: 'vbkawgch3kkkhqax@ethereal.email',
-    pass: 'bVWMcjVnQenkaJsGz4'
-  }
-})
-
 // create the multer instance that will be used to upload/save the file
 
 router.use(bodyParser.json())
@@ -63,84 +52,32 @@ router.post('/upload', upload.single('selectedFile'), (req, res) => {
 // Handle any other errors
 router.use(function (err, req, res, next) {
   if (err.code === 'LIMIT_FILE_SIZE') {
-    console.log('fail')
-    res.send({ result: 'fail', error: { code: 1001, message: 'File is too big' } }
-    )
+    res.send({ result: 'fail', error: { code: 1001, message: 'File is too big' } })
     return
   }
+
   next(err)
 })
 
 // POST Registration Admin
 
 router.post('/signupadmin', async (req, res, next) => {
-
-  const newAdmin = await new AdminModel(req.body.user)
+  const { user } = req.body
+  const newAdmin = await new AdminModel(user)
   newAdmin.password = await bcrypt.hash(newAdmin.password, 16)
 
-  await newAdmin
-    .save()
+  newAdmin.save()
     .then(res.json('ok'))
     .then(async () => {
-      const user = await AdminModel.findOne({ email: req.body.user.email })
-      console.log(user._id)
-      // await AdminModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
-      // await AdminModel.findOne({email: req.body.user.email})
-      let link = await `${hostUrl}/confirmationadmin/${user._id}` // attention backend a changer -Dan
-      console.log(link)
-      // setup email data with unicode symbols
-      let mailOptions = {
-        from: 'tester@gmail.com', // sender address
-        to: `${req.body.user.email}`, // list of receivers
-        subject: 'Confirmez votre adresse mail', // Subject line
-        text: `Admin,
+      const user = await AdminModel.findOne({ email: user.email })
+      const link = `${hostUrl}/confirmationadmin/${user._id}`
 
-                      Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :
-
-                      ${link}
-
-                      Merci,
-
-                      L’équipe de LITTA`,
-        html: `<style>
-                    a {text-decoration: none; color: #7accbc;}
-                    a:hover {color: #1fa792;}
-                    button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
-                    button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
-                    img {height: 70px; width: auto;}
-                    table {border: none; font-size: 12px; color: #7accbc;}
-                    span {font-weight: bold; color: #1fa792;}
-                  </style>
-                  <p>Admin,</p>
-                  <p>Afin de validez votre compte administrateur, merci de cliquer sur le lien suivant :</p>
-                  <a href="${link}" target="_blank">
-                    <button>Valider l'inscription</button>
-                  </a>
-                  <p>Merci,<br />L’équipe de LITTA</p>
-                  <table>
-                    <tr>
-                      <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
-                    </tr>
-                    <tr>
-                      <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-                    </tr>
-                  </table>`,
-        attachments: [{
-          filename: 'logo.png',
-          path: __dirname + '/img/logo.png',
-          cid: 'logo' // same cid value as in the html img src
-        }]
+      const options = {
+        to: LITTA_ADMIN_EMAIL,
+        ...mail.templates.ADMIN_ACCOUNT_CONFIRMATION(link)
       }
 
-      // send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return console.log(error);
-        }
-        console.log('Message sent: %s', info.messageId);
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-      })
+      return mail.send(options)
     })
     .catch(next)
 })
@@ -148,71 +85,23 @@ router.post('/signupadmin', async (req, res, next) => {
 // POST Registration Student
 
 router.post('/regstudent', async (req, res, next) => {
-  const newStudent = await new StudentModel(req.body.user)
+  const { user } = req.body
+  const newStudent = await new StudentModel(user)
   newStudent.password = await bcrypt.hash(newStudent.password, 16)
 
-
-  await newStudent
-    .save()
+  newStudent.save()
     .then(res.json('ok'))
     .then(async () => {
-      const user = await StudentModel.findOne({ email: req.body.user.email })
-      let link = await `${hostUrl}/confirmationstudent/${user._id}`
+      const user = await StudentModel.findOne({ email: user.email })
+      const link = `${hostUrl}/confirmationstudent/${user._id}`
 
-
-      // setup email data with unicode symbols
-      let mailOptions = {
-        from: 'tester@gmail.com', // sender address
-        to: `${req.body.user.email}`, // list of receivers
-        subject: 'Confirmez votre adresse mail', // Subject line
-        text: `Cheres Etudiant,
-
-                Afin de validez votre inscription sur LITTA en attendant la validation d'un administrateur, merci de cliquer sur le lien suivant :
-
-                ${link}
-
-                Merci,
-
-                L’équipe de LITTA`,
-        html: `<style>
-            a {text-decoration: none; color: #7accbc;}
-            a:hover {color: #1fa792;}
-            button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
-            button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
-            img {height: 70px; width: auto;}
-            table {border: none; font-size: 12px; color: #7accbc;}
-            span {font-weight: bold; color: #1fa792;}
-          </style>
-          <p><Cheres Etudiant,/p>
-          <p>Afin de validez votre inscription sur LITTA en attendant la validation d'un administrateur, merci de cliquer sur le lien suivant :</p>
-          <a href="${link}" target="_blank">
-            <button>Valider l'inscription</button>
-          </a>
-          <p>Merci,<br />L’équipe de LITTA</p>
-          <table>
-            <tr>
-              <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
-            </tr>
-            <tr>
-              <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-            </tr>
-          </table>`,
-        attachments: [{
-          filename: 'logo.png',
-          path: __dirname + '/img/logo.png',
-          cid: 'logo' // same cid value as in the html img src
-        }]
+      const options = {
+        to: `${user.email}`,
+        subject: 'Confirmez votre adresse mail',
+        ...mail.templates.STUDENT_ACCOUNT_CONFIRMATION(link)
       }
 
-      // send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return console.log(error)
-        }
-        console.log('Message sent: %s', info.messageId)
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
-      })
+      return mail.send(options)
     })
     .catch(next)
 })
@@ -220,72 +109,23 @@ router.post('/regstudent', async (req, res, next) => {
 
 
 router.post('/reg', async (req, res, next) => {
-
-  const newAvocat = await new AvocatModel(req.body.user)
+  const { user } = req.body
+  const newAvocat = await new AvocatModel(user)
   newAvocat.password = await bcrypt.hash(newAvocat.password, 16)
 
-  await newAvocat
-    .save()
+  newAvocat.save()
     .then(res.json('ok'))
     .then(async () => {
-      const user = await AvocatModel.findOne({ email: req.body.user.email })
-      // await AvocatModel.findByIdAndUpdate(user._id, {uuid: uuidv4()}) const user2 =
-      // await AvocatModel.findOne({email: req.body.user.email})
-      let link = await `${hostUrl}/confirmationlawyer/${user._id}` // attention backend a changer -Dan
+      const user = await AvocatModel.findOne({ email: user.email })
+      const link = `${hostUrl}/confirmationlawyer/${user._id}`
 
-      // setup email data with unicode symbols
-      let mailOptions = {
-        from: 'tester@gmail.com', // sender address
-        to: `${req.body.user.email}`, // list of receivers
-        subject: 'Confirmez votre adresse mail', // Subject line
-        text: `Maître,
-
-                Afin de validez votre inscription sur LITTA, merci de cliquer sur le lien suivant :
-
-                ${link}
-
-                Merci,
-
-                L’équipe de LITTA`,
-        html: `<style>
-            a {text-decoration: none; color: #7accbc;}
-            a:hover {color: #1fa792;}
-            button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
-            button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
-            img {height: 70px; width: auto;}
-            table {border: none; font-size: 12px; color: #7accbc;}
-             span {font-weight: bold; color: #1fa792;}
-          </style>
-          <p>Maître,</p>
-          <p>Afin de validez votre inscription sur LITTA, merci de cliquer sur le lien suivant :</p>
-          <a href="${link}" target="_blank">
-            <button>Valider l'inscription</button>
-          </a>
-          <p>Merci,<br />L’équipe de LITTA</p>
-          <table>
-            <tr>
-              <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
-            </tr>
-            <tr>
-              <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-            </tr>
-          </table>`,
-        attachments: [{
-          filename: 'logo.png',
-          path: __dirname + '/img/logo.png',
-          cid: 'logo' // same cid value as in the html img src
-        }]
+      const options = {
+        to: `${user.email}`,
+        subject: 'Confirmez votre adresse mail',
+        ...mail.templates.LAWYER_ACCOUNT_CONFIRMATION(link)
       }
 
-      // send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return console.log(error)
-        }
-        console.log('Message sent: %s', info.messageId)
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
-      })
+      return mail.send(options)
     })
     .catch(next)
 })
@@ -301,7 +141,6 @@ router.get('/confirmationadmin/:uuid', async (req, res) => {
 // Mail Confirm Get Advocat
 
 router.get('/confirmationlawyer/:uuid', async (req, res) => {
-
   console.log(req.params.uuid)
   const query = await { _id: `${req.params.uuid}` }
   await AvocatModel.findOneAndUpdate(query, { activated: true })
@@ -518,7 +357,7 @@ const sendNewMissionProposalToStudent = (student, mission) => {
 
 const sendNewMissionToAdmin = (mission) => {
   const options = {
-    to: 'admin@litta.fr',
+    to: LITTA_ADMIN_EMAIL,
     ...mail.templates.ADMIN_CONFIRMATION_NEW_MISSION(mission)
   }
 
@@ -594,73 +433,15 @@ router.put('/missions/:missionId', (req, res, next) => {
 router.post('/missions/:missionId/sendmessage', async (req, res, next) => {
   const messageContent = req.body.messageContent
   const missionId = messageContent.missionId.slice(-5)
-  await StudentModel.findOne({ _id: req.body.messageContent.studentId })
+
+  StudentModel.findOne({ _id: messageContent.studentId })
     .then(student => {
-      let mailOptions = {
-        from: 'tester@gmail.com', // sender address
-        to: 'admin@litta.fr', // list of receivers
-        subject: `Mission n°${missionId} / Message pour l'étudiant`, // Subject line
-        text: `Admin,
-
-                Pour la mission n°${missionId}, le cabinet ${messageContent.author} souhaite envoyer le message ci-dessous à :
-                ${student.firstName} ${student.lastName}
-                ${student.email}
-
-                Objet :
-                ${messageContent.objet}
-
-                Message :
-                ${messageContent.message}
-                `,
-        html: `<style>
-            a {text-decoration: none; color: #7accbc;}
-            a:hover {color: #1fa792;}
-            button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
-            button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
-            img {height: 70px; width: auto;}
-            table {border: none; font-size: 12px; color: #7accbc;}
-            span {font-weight: bold; color: #1fa792;}
-          </style>
-          <p>Admin,</p>
-          <p>Pour la mission n°${missionId}, le cabinet ${messageContent.author} souhaite envoyer le message ci-dessous à :
-          <br>
-          <br/>
-          ${student.firstName} ${student.lastName}
-          <br/>
-          ${student.email}
-          <br/>
-          <br/>
-          Objet :
-          <br/>${messageContent.objet}
-          <br/>
-          <br />
-          Message :
-          <br />
-          ${messageContent.message}</p>
-          <table>
-            <tr>
-              <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
-            </tr>
-            <tr>
-              <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-            </tr>
-          </table>`,
-        attachments: [{
-          filename: 'logo.png',
-          path: __dirname + '/img/logo.png',
-          cid: 'logo' // same cid value as in the html img src
-        }]
+      const options = {
+        to: LITTA_ADMIN_EMAIL,
+        ...mail.templates.LAWYER_MESSAGE_TO_STUDENT(missionId, student, message)
       }
 
-      // send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return console.log(error)
-        }
-        console.log('Message sent: %s', info.messageId)
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
-      })
+      return mail.send(options)
     })
     .then(res.json("ok"))
     .catch(next)
@@ -699,80 +480,24 @@ router.post('/oldmissionsfiltered', (req, res, next) => {
         return oldmission
       })
     )
-      // return res.json(oldmissions)
-)
-    .then(oldmissions => res.json(oldmissions))
-    .catch(next)
+  )
+  .then(oldmissions => res.json(oldmissions))
+  .catch(next)
 })
 
 // REPORT PROBLEM TO ADMIN
 router.post('/missions/:missionId/reportproblem', async (req, res, next) => {
   const messageContent = req.body.messageContent
   const missionId = messageContent.missionId.slice(-5)
-  await StudentModel.findOne({ _id: req.body.messageContent.studentId })
+
+  StudentModel.findOne({ _id: req.body.messageContent.studentId })
     .then(student => {
-      let mailOptions = {
-        from: 'tester@gmail.com', // sender address
-        to: 'admin@litta.fr', // list of receivers
-        subject: `Mission n°${missionId} / Report de problème`, // Subject line
-        text: `Admin,
-
-                Pour la mission n°${missionId}, le cabinet ${messageContent.author} souhaite reporter un problème rencontré durant sa collaboration avec :
-                ${student.firstName} ${student.lastName}
-
-                Nature du problème :
-                ${messageContent.problem}
-
-                Description :
-                ${messageContent.description}
-                `,
-        html: `<style>
-            a {text-decoration: none; color: #7accbc;}
-            a:hover {color: #1fa792;}
-            button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
-            button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
-            img {height: 70px; width: auto;}
-            table {border: none; font-size: 12px; color: #7accbc;}
-            span {font-weight: bold; color: #1fa792;}
-          </style>
-          <p>Admin,</p>
-          <p>Pour la mission n°${missionId}, le cabinet ${messageContent.author} souhaite reporter un problème rencontré durant sa collaboration avec :
-          <br>
-          <br/>
-          ${student.firstName} ${student.lastName}
-          <br/>
-          <br/>
-          Nature du problème :
-          <br/>${messageContent.problem}
-          <br/>
-          <br />
-          Description :
-          <br />
-          ${messageContent.description}</p>
-          <table>
-            <tr>
-              <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
-            </tr>
-            <tr>
-              <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-            </tr>
-          </table>`,
-        attachments: [{
-          filename: 'logo.png',
-          path: __dirname + '/img/logo.png',
-          cid: 'logo' // same cid value as in the html img src
-        }]
+      const options = {
+        to: LITTA_ADMIN_EMAIL,
+        ...mail.templates.LAWYER_REPORT_PROBLEM_TO_ADMIN(missionId, student, message)
       }
 
-      // send mail with defined transport object
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return console.log(error)
-        }
-        console.log('Message sent: %s', info.messageId)
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info))
-      })
+      return mail.send(options)
     })
     .then(res.json("ok"))
     .catch(next)
