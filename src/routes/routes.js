@@ -505,6 +505,26 @@ router.post('/infostudent', async (req, res, next) => {
 
 const mail = require('./mail')
 
+const sendNewMissionProposalToStudent = (student, mission) => {
+  const link = `${hostUrl}/accept/${mission._id}/${student._id}`
+
+  const options = {
+    to: student.email,
+    ...mail.templates.STUDENT_MISSION_WITH_LINK_PROPOSAL(mission, link)
+  }
+
+  return mail.send(options)
+}
+
+const sendNewMissionToAdmin = (mission) => {
+  const options = {
+    to: 'admin@litta.fr',
+    ...mail.templates.ADMIN_CONFIRMATION_NEW_MISSION(mission)
+  }
+
+  return mail.send(options)
+}
+
 // Create mission
 router.post('/missions', function (req, res, next) {
   const { mission } = req.body
@@ -513,88 +533,18 @@ router.post('/missions', function (req, res, next) {
   newMission
     .save()
     .then(() => res.json(newMission))
-    .then(() => {
-      StudentModel.find()
-        .then(students => {
-          const concernedStudents = students.filter(student => student.field === mission.field)
+    .then(async () => {
+      const students = await StudentModel.find()
+      const concernedStudents = students.filter(student => student.field === mission.field)
 
-          console.log(`Number of potential students: ${concernedStudents.length}`)
-          for (const student of concernedStudents) {
-            const link = `${hostUrl}/accept/${newMission._id}/${student._id}`
+      console.log(`Number of potential students: ${concernedStudents.length}`)
 
-            const options = {
-              to: student.email,
-              ...mail.studentPropositionMail(mission, link)
-            }
+      concernedStudents
+        .map(student => sendNewMissionProposalToStudent(student, newMission))
 
-            mail.send(options)
-          }
-        })
-        .catch(next)
+      sendNewMissionToAdmin(newMission)
     })
-  // .then(() => {
-  //  let mailOptions = {
-  //    from: 'tester@gmail.com', // sender address
-  //    to: 'admin@litta.fr', // list of receivers
-  //    subject: `Mission n°${newMission._id.slice(-5)} / Nouvelle mission déposée`, // Subject line
-  //    text: `Admin,
-
-  //    Numéro de mission unique : ${newMission._id.slice(-5)}
-  //    Echéance : ${new Date(newMission.deadline).toLocaleString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
-  //    Nom du cabinet : ${newMission.name}
-  //    Nom de l’avocat : ${newMission.author}
-  //    Prix : ${newMission.price}
-  //    Domaine du droit : ${newMission.field}
-  //    Contenu : ${newMission.description}
-  //            `,
-  //    html: `<style>
-  //        a {text-decoration: none; color: #7accbc;}
-  //        a:hover {color: #1fa792;}
-  //        button {width: 140px; height: 30px; background-color: #7accbc; color: white; border: none; padding: 7px; text-transform: uppercase; font-size: 10px; cursor: pointer;}
-  //        button:hover {background-color: #1fa792; padding: 7px; font-weight: bold;}
-  //        img {height: 70px; width: auto;}
-  //        table {border: none; font-size: 12px; color: #7accbc;}
-  //        span {font-weight: bold; color: #1fa792;}
-  //      </style>
-  //      <p>Admin,</p>
-  //      <p>Numéro de mission unique : ${newMission._id.slice(-5)}
-  //      <br/>
-  //      Echéance : ${new Date(newMission.deadline).toLocaleString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}
-  //      <br/>
-  //      Nom du cabinet : ${newMission.cabinet}
-  //      <br/>
-  //      Nom de l’avocat : ${newMission.author}
-  //      <br/>
-  //      Prix : ${newMission.price}
-  //      <br/>
-  //      Domaine du droit : ${newMission.field}
-  //      <br/>
-  //      Contenu : ${newMission.description}</p>
-  //      <table>
-  //        <tr>
-  //          <td rowspan="2" style="padding-right: 10px;"><img src="cid:logo" /></td>
-  //        </tr>
-  //        <tr>
-  //          <td style="border-left: solid 1px; padding-left: 8px;"><span>LITTA</span><br /><a href="mailto:contact@litta.fr">contact@litta.fr</a><br /><a href="litta.fr">litta.fr</a><br />&copy; Legal Intern to Take Away</td>
-  //        </tr>
-  //      </table>`,
-  //    attachments: [{
-  //      filename: 'logo.png',
-  //      path: __dirname + '/img/logo.png',
-  //      cid: 'logo' // same cid value as in the html img src
-  //    }]
-  //  }
-
-  //  // send mail with defined transport object
-  //  transporter.sendMail(mailOptions, (error, info) => {
-  //    if (error) {
-  //      return console.log(error)
-  //    }
-  //    console.log('Message sent: %s', info.messageId)
-  //    // Preview only available when sending through an Ethereal account
-  //    console.log('Preview URL admin: %s', nodemailer.getTestMessageUrl(info))
-  //  })
-  // })
+    .catch(next)
 })
 
 // GET Accept Mission
