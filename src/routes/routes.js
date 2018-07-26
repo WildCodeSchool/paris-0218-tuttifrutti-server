@@ -6,14 +6,15 @@ const StudentModel = require('../models/student.js')
 const AdminModel = require('../models/admin.js')
 const bcrypt = require('bcrypt-promise')
 const jwt = require('jsonwebtoken')
-const jwtSecret = 'MAKEITUNUVERSAL'
 const nodemailer = require('nodemailer')
 const bodyParser = require('body-parser')
 const multer = require('multer')
 // const uuidv4 = require('uuid/v4')
 // const path = require('path')
+const mail = require('./mail')
 
 const hostUrl = process.env.HOST_URL || 'http://localhost:3000'
+const jwtSecret = process.env.JWT_SECRET || 'MAKEITUNUVERSAL'
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -503,7 +504,6 @@ router.post('/infostudent', async (req, res, next) => {
     .catch(next)
 })
 
-const mail = require('./mail')
 
 const sendNewMissionProposalToStudent = (student, mission) => {
   const link = `${hostUrl}/accept/${mission._id}/${student._id}`
