@@ -4,6 +4,8 @@ const bodyParser = require('body-parser')
 const routes = require('./routes/routes.js')
 require('./database.js')
 
+const port = process.env.PORT || 5000
+
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE')
@@ -30,4 +32,4 @@ app.get('/', (req, res) => {
 
 app.use('/', routes)
 
-app.listen(3030, () => console.log(`server listening on port: 3030`))
+app.listen(port, () => console.log(`server listening on port: ${port}`))
