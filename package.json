@@ -19,6 +19,7 @@
   "scripts": {
     "start": "nodemon src --ignore sessions",
     "test": "echo 'no tests'",
+    "deploy": "git push heroku master",
     "lint": "npm run lint:js",
     "lint:js": "eslint .",
     "lint:fix": "eslint --fix ."
