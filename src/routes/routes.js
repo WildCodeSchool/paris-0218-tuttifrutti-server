@@ -68,8 +68,8 @@ router.post('/signupadmin', async (req, res, next) => {
 
   newAdmin.save()
     .then(res.json('ok'))
-    .then(async () => {
-      const user = await AdminModel.findOne({ email: user.email })
+    .then(async newuser => {
+      const user = await AdminModel.findOne({ email: newuser.email })
       const link = `${hostUrl}/confirmationadmin/${user._id}`
 
       const options = {
@@ -91,8 +91,8 @@ router.post('/regstudent', async (req, res, next) => {
 
   newStudent.save()
     .then(res.json('ok'))
-    .then(async () => {
-      const user = await StudentModel.findOne({ email: user.email })
+    .then(async newuser => {
+      const user = await StudentModel.findOne({ email: newuser.email })
       const link = `${hostUrl}/confirmationstudent/${user._id}`
 
       const options = {
@@ -115,8 +115,8 @@ router.post('/reg', async (req, res, next) => {
 
   newAvocat.save()
     .then(res.json('ok'))
-    .then(async () => {
-      const user = await AvocatModel.findOne({ email: user.email })
+    .then(async newuser => {
+      const user = await AvocatModel.findOne({ email: newuser.email })
       const link = `${hostUrl}/confirmationlawyer/${user._id}`
 
       const options = {
@@ -438,7 +438,7 @@ router.post('/missions/:missionId/sendmessage', async (req, res, next) => {
     .then(student => {
       const options = {
         to: LITTA_ADMIN_EMAIL,
-        ...mail.templates.LAWYER_MESSAGE_TO_STUDENT(missionId, student, message)
+        ...mail.templates.LAWYER_MESSAGE_TO_STUDENT(missionId, student, messageContent)
       }
 
       return mail.send(options)
@@ -494,7 +494,7 @@ router.post('/missions/:missionId/reportproblem', async (req, res, next) => {
     .then(student => {
       const options = {
         to: LITTA_ADMIN_EMAIL,
-        ...mail.templates.LAWYER_REPORT_PROBLEM_TO_ADMIN(missionId, student, message)
+        ...mail.templates.LAWYER_REPORT_PROBLEM_TO_ADMIN(missionId, student, messageContent)
       }
 
       return mail.send(options)
